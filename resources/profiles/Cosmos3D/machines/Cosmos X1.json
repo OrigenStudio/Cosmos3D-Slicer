@@ -1,0 +1,12 @@
+{
+    "type": "machine_model",
+    "name": "Cosmos X1",
+    "model_id": "cosmos_x1",
+    "nozzle_diameter": "60",
+    "machine_tech": "FFF",
+    "family": "Cosmos3D",
+    "bed_model": "",
+    "bed_texture": "orcaslicer_bed_texture.svg",
+    "hotend_model": "",
+    "default_materials": "Concrete - Cosmos3D"
+}

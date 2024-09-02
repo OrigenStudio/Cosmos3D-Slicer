@@ -73,6 +73,7 @@ filament_vendors = [
     'colorFabb',
     'Comgrow',
     'Cookiecad',
+    'Cosmos3D',
     'Creality',
     'CERPRiSE',
     'Das Filament',

@@ -1,0 +1,31 @@
+{
+  "name": "Cosmos3D",
+  "version": "02.01.01.00",
+  "force_update": "0",
+  "description": "Cosmos3D configurations",
+  "machine_model_list": [],
+  "process_list": [
+    {
+      "name": "Generic concrete printing",
+      "sub_path": "process/concrete_printing.json"
+    }
+  ],
+  "filament_list": [
+    {
+      "name": "filament_concrete",
+      "sub_path": "filament/filament_concrete.json"
+    }
+  ],
+  "machine_model_list": [
+    {
+      "name": "Cosmos X1",
+      "sub_path": "machine/Cosmos X1.json"
+    }
+  ],
+  "machine_list": [
+    {
+      "name": "Cosmos X1 60 nozzle",
+      "sub_path": "machine/Cosmos X1 60 nozzle.json"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "machine",
+  "name": "Cosmos X1 60 nozzle",
+  "from": "system",
+  "setting_id": "GM001",
+  "instantiation": "true",
+  "nozzle_diameter": ["60"],
+  "printer_model": "Cosmos X1",
+  "gcode_flavor": "marlin",
+  "inherits": "cosmos_machine_common",
+  "printable_area": ["0x0", "5000x0", "5000x10000", "0x10000"],
+  "printable_height": "3000",
+  "default_filament_profile": ["Concrete - Cosmos3D"],
+  "default_print_profile": "concrete printing",
+  "machine_start_gcode": ";===== machine: Cosmos3D V1 ====================\n;===== version: 0001 ==================\n;",
+  "machine_end_gcode": ";===== version: 0001 =====================\n"
+}
