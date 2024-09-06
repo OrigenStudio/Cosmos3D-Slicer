@@ -300,7 +300,7 @@ void Label::SetWindowStyleFlag(long style)
     wxStaticText::SetWindowStyleFlag(style);
     if (style & LB_HYPERLINK) {
         this->m_color = GetForegroundColour();
-        static wxColor clr_url("#4872E3");
+        static wxColor clr_url("#4872E3"); 
         SetFont(this->m_font.Underlined());
         SetForegroundColour(clr_url);
         SetCursor(wxCURSOR_HAND);
