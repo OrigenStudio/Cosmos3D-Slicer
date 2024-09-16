@@ -148,7 +148,7 @@ static const std::unordered_map<std::string, std::vector<std::string>> printer_m
      {"Artillery",      {"sidewinder X1",   "Genius", "Hornet"}},
      {"BIBO",           {"BIBO2 Touch"}},
      {"BIQU",           {"BX"}},
-     {"Cosmos3D",           {"Cosmos3D V1"}},
+     {"Cosmos3D",           {"Cosmos3D X1"}},
      {"Creality ENDER", {"Ender-3",         "Ender-3 BLTouch",  "Ender-3 Pro",      "Ender-3 Neo",      
                         "Ender-3 V2 Neo",   "Ender-3 S1 Plus",  "Ender-3 Max", "Ender-3 Max Neo",
                         "Ender-4",          "Ender-5 Pro",      "Ender-5 Pro",      

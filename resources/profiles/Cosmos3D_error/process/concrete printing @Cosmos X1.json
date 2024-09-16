@@ -1,6 +1,7 @@
 {
     "type": "process",
-    "name": "concrete printing", 
+    "inherits": "fdm_process_common",
+    "name": "concrete printing @Cosmos X1", 
     "default_acceleration": "100",
     "filename_format": "{input_filename_base}_{filament_type[0]}_{print_time}.gcode",
     "gap_infill_speed": "67",
@@ -30,5 +31,5 @@
     "wall_generator": "classic",
     "xy_hole_compensation": "0",
     "xy_contour_compensation": "0",
-    "compatible_printers": []
+    "compatible_printers": ["Cosmos X1 60 nozzle"]
 }

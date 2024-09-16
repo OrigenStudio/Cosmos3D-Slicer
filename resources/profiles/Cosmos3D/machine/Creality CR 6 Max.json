@@ -1,0 +1,11 @@
+{
+    "type": "machine_model",
+    "name": "Cosmos X1",
+    "model_id": "Cosmos_X1",
+    "nozzle_diameter": "60",
+    "machine_tech": "FFF",
+    "family": "Cosmos3D",
+    "bed_texture": "creality_cr6se_buildplate_texture.png",
+    "hotend_model": "",
+    "default_materials": "Creality Generic PLA;Creality Generic PETG;Creality Generic ABS"
+}

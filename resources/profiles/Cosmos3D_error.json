@@ -1,0 +1,42 @@
+{
+  "name": "Cosmos3D",
+  "version": "02.01.01.00",
+  "force_update": "0",
+  "description": "Cosmos3D configurations",
+  "process_list": [
+    {
+      "name": "fdm_process_common",
+      "sub_path": "process/fdm_process_common.json"
+    },
+    {
+      "name": "concrete printing @Cosmos X1",
+      "sub_path": "process/concrete printing @Cosmos X1.json"
+    }
+  ],
+  "filament_list": [
+    {
+      "name": "fdm_filament_common",
+      "sub_path": "filament/fdm_filament_common.json"
+    },
+    {
+      "name": "filament_concrete",
+      "sub_path": "filament/filament_concrete.json"
+    }
+  ],
+  "machine_model_list": [
+    {
+      "name": "Cosmos X1",
+      "sub_path": "machine/Cosmos X1.json"
+    }
+  ],
+  "machine_list": [
+    {
+      "name": "fdm_machine_common",
+      "sub_path": "machine/fdm_machine_common.json"
+    },
+    {
+      "name": "Cosmos X1 60 nozzle",
+      "sub_path": "machine/Cosmos X1 60 nozzle.json"
+    }
+  ]
+}
