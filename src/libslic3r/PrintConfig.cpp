@@ -13,6 +13,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/thread.hpp>
 #include <float.h>
+#include <stdio.h>
 
 namespace {
 std::set<std::string> SplitStringAndRemoveDuplicateElement(const std::string &str, const std::string &separator)
@@ -2005,6 +2006,7 @@ void PrintConfigDef::init_fff_params()
     def->enum_values.push_back("PVA");
     def->enum_values.push_back("PVB");
     def->enum_values.push_back("TPU");
+    def->enum_values.push_back("Concrete");
     def->mode = comSimple;
     def->set_default_value(new ConfigOptionStrings { "PLA" });
 
@@ -6404,6 +6406,12 @@ std::string DynamicPrintConfig::get_filament_type(std::string &displayed_filamen
     auto* filament_type = dynamic_cast<const ConfigOptionStrings*>(this->option("filament_type"));
     auto* filament_is_support = dynamic_cast<const ConfigOptionBools*>(this->option("filament_is_support"));
 
+    // print variables
+    printf("PRINTING DEBUG");
+    printf("filament_id: %s\n", filament_id->serialize().c_str());
+    printf("filament_type: %s\n", filament_type->serialize().c_str());
+    printf("filament_is_support: %s\n", filament_is_support->serialize().c_str());
+
     if (!filament_type)
         return "";
 
@@ -6462,6 +6470,8 @@ std::string DynamicPrintConfig::get_filament_type(std::string &displayed_filamen
             return filament_type->get_at(id);
         }
     }
+
+    printf("TESTING");
     return "PLA";
 }
 

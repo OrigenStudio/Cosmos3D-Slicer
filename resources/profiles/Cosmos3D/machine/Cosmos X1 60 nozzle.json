@@ -3,15 +3,12 @@
   "name": "Cosmos X1 60 nozzle",
   "from": "system",
   "instantiation": "true",
-  "inherits": "fdm_creality_common",
+  "inherits": "fdm_machine_common",
   "printer_model": "Cosmos X1",
-  "default_filament_profile": [
-    "CR6 Generic PLA"
-  ],
   "printer_variant": "60",
-  "default_print_profile": "0.16mm Opitmal @Creality 0.2 CR6",
+  "default_print_profile": "60mm Standard @Cosmos X1",
   "nozzle_diameter": [
-    "0.2"
+    "60"
   ],
   "printable_area": ["0x0", "5000x0", "5000x10000", "0x10000"],
   "printable_height": "3000",

@@ -8,6 +8,7 @@
 #include <boost/log/trivial.hpp>
 #include <cstddef>
 #include <vector>
+#include <stdio.h>
 
 
 namespace Slic3r {
@@ -25,9 +26,12 @@ struct Params
                 << "SupportSpotsGenerator does not currently handle different materials properly, only first will be used";
         }
         if (filament_types.empty() || filament_types[0].empty()) {
+            printf("SupportSpotsGenerator error: empty filament_type\n");
             BOOST_LOG_TRIVIAL(error) << "SupportSpotsGenerator error: empty filament_type";
             filament_type = std::string("PLA");
         } else {
+            printf("ELSE\n");
+            printf("SupportSpotsGenerator: applying filament type: %s\n", filament_types[0].c_str());
             filament_type = filament_types[0];
             BOOST_LOG_TRIVIAL(debug) << "SupportSpotsGenerator: applying filament type: " << filament_type;
         }

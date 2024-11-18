@@ -23,7 +23,7 @@
 #include <boost/locale.hpp>
 #include <boost/log/trivial.hpp>
 #include <miniz/miniz.h>
-
+#include <stdio.h>
 
 // Store the print/filament/printer presets into a "presets" subdirectory of the Slic3rPE config dir.
 // This breaks compatibility with the upstream Slic3r if the --datadir is used to switch between the two versions.
@@ -64,6 +64,9 @@ PresetBundle::PresetBundle()
     // "compatible_printers", "compatible_printers_condition", "inherits",
     // "print_settings_id", "filament_settings_id", "printer_settings_id", "printer_settings_id"
     // "printer_model", "printer_variant", "default_print_profile", "default_filament_profile"
+
+    printf("PresetBundle::PresetBundle\n");
+    printf("FILAMENT: %s\n", filaments.get_selected_preset_name().c_str());
 
     // Create the ID config keys, as they are not part of the Static print config classes.
     this->prints.default_preset().config.optptr("print_settings_id", true);

@@ -4,28 +4,28 @@
     "from": "system",
     "instantiation": "false",
     "cool_plate_temp" : [
-        "60"
+        "62"
     ],
     "eng_plate_temp" : [
-        "60"
+        "62"
     ],
     "hot_plate_temp" : [
-        "60"
+        "62"
     ],
     "textured_plate_temp" : [
-        "60"
+        "62"
     ],
     "cool_plate_temp_initial_layer" : [
-        "60"
+        "66"
     ],
     "eng_plate_temp_initial_layer" : [
-        "60"
+        "66"
     ],
     "hot_plate_temp_initial_layer" : [
-        "60"
+        "66"
     ],
     "textured_plate_temp_initial_layer" : [
-        "60"
+        "66"
     ],
     "overhang_fan_threshold": [
         "95%"
@@ -100,10 +100,10 @@
         "0"
     ],
     "filament_type": [
-        "PLA"
+        "Concrete"
     ],
     "filament_vendor": [
-        "Generic"
+        "Cosmos3D"
     ],
     "filament_wipe": [
         "nil"
@@ -112,7 +112,7 @@
         "nil"
     ],
     "bed_type": [
-        "Cool Plate"
+        "Engineering Plate"
     ],
     "nozzle_temperature_initial_layer": [
         "200"

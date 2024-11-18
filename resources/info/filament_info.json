@@ -14,7 +14,8 @@
         "PPA-CF",
         "PPA-GF",
         "ABS-GF",
-        "ASA-Aero"
+        "ASA-Aero",
+        "Concrete"
     ],
     "low_temp_filament": [
         "PLA",
@@ -22,7 +23,8 @@
         "PLA-CF",
         "PLA-AERO",
         "PVA",
-        "BVOH"
+        "BVOH",
+        "Concrete"
     ],
     "high_low_compatible_filament":[
         "HIPS",
@@ -33,6 +35,7 @@
         "PE-CF",
         "PP-CF",
         "PP-GF",
-        "PHA"
+        "PHA",
+        "Concrete"
     ]
 }

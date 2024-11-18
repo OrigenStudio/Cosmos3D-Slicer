@@ -5,12 +5,8 @@
     "description": "Cosmos3D configurations",
     "machine_model_list": [
         {
-            "name": "Creality CR 6 SE",
-            "sub_path": "machine/Creality CR 6 SE.json"
-        },
-        {
             "name": "Cosmos X1",
-            "sub_path": "machine/Creality CR 6 Max.json"
+            "sub_path": "machine/Cosmos X1.json"
         }
     ],
     "process_list": [
@@ -153,28 +149,13 @@
             "sub_path": "filament/fdm_filament_common.json"
         },
         {
-            "name": "fdm_filament_pla",
-            "sub_path": "filament/fdm_filament_pla.json"
+            "name": "fdm_filament_concrete",
+            "sub_path": "filament/fdm_filament_concrete.json"
         },
         {
-            "name": "fdm_filament_pet",
-            "sub_path": "filament/fdm_filament_pet.json"
-        },
-        {
-            "name": "fdm_filament_abs",
-            "sub_path": "filament/fdm_filament_abs.json"
-        },
-        {
-            "name": "CR6 Generic PLA",
-            "sub_path": "filament/CR6 Generic PLA.json"
-        },
-        {
-            "name": "CR6 Generic PETG",
-            "sub_path": "filament/CR6 Generic PETG.json"
-        },
-        {
-            "name": "CR6 Generic ABS",
-            "sub_path": "filament/CR6 Generic ABS.json"
+            
+            "name": "Generic Concrete",
+            "sub_path": "filament/Generic Concrete.json"
         }
     ],
     "machine_list": [
@@ -182,41 +163,9 @@
             "name": "fdm_machine_common",
             "sub_path": "machine/fdm_machine_common.json"
         },
-        {
-            "name": "fdm_creality_common",
-            "sub_path": "machine/fdm_creality_common.json"
-        },
-        {   
-		    "name": "Creality CR 6 SE 0.2 nozzle",
-            "sub_path": "machine/Creality CR 6 SE 0.2 nozzle.json"
-        },
-		{   
-		    "name": "Creality CR 6 SE 0.3 nozzle",
-            "sub_path": "machine/Creality CR 6 SE 0.3 nozzle.json"
-        },
-        {
-            "name": "Creality CR 6 SE 0.4 nozzle",
-            "sub_path": "machine/Creality CR 6 SE 0.4 nozzle.json"
-        },
-		{   
-		    "name": "Creality CR 6 SE 0.5 nozzle",
-            "sub_path": "machine/Creality CR 6 SE 0.5 nozzle.json"
-        },
-	    {
-	        "name": "Creality CR 6 SE 0.6 nozzle",
-	        "sub_path": "machine/Creality CR 6 SE 0.6 nozzle.json"
-	    },
-        {           
-            "name": "Creality CR 6 SE 0.8 nozzle",
-	        "sub_path": "machine/Creality CR 6 SE 0.8 nozzle.json"
-	    },
-		{   
-		    "name": "Creality CR 6 SE 1.0 nozzle",
-            "sub_path": "machine/Creality CR 6 SE 1.0 nozzle.json"
-        },
         {     
 	        "name": "Cosmos X1 60 nozzle",
-            "sub_path": "machine/Creality CR 6 Max 0.2 nozzle.json"
+            "sub_path": "machine/Cosmos X1 60 nozzle.json"
         }
     ]
 }
