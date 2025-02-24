@@ -1,0 +1,21 @@
+{
+    "type": "filament",
+    "filament_id": "CRL99",
+    "setting_id": "CRSA04",
+    "name": "Generic PLA @Cosmos3D X1",
+    "from": "system",
+    "instantiation": "true",
+    "inherits": "fdm_filament_pla",
+    "filament_flow_ratio": [
+        "0.98"
+    ],
+    "filament_max_volumetric_speed": [
+        "12"
+    ],
+    "slow_down_layer_time": [
+        "8"
+    ],
+	"compatible_printers": [
+        "Cosmos3D X1"
+    ]
+}
