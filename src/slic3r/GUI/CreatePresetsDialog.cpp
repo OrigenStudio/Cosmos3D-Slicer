@@ -186,10 +186,11 @@ static const std::unordered_map<std::string, std::vector<std::string>> printer_m
                         "Zero 120mm3",      "Switchwire"}},
      {"Zonestar",       {"Z5",              "Z6",               "Z5x",              "Z8",               "Z9"}}};
 
-static std::vector<std::string>               nozzle_diameter_vec = {"0.4", "0.15", "0.2", "0.25", "0.3", "0.35", "0.5", "0.6", "0.75", "0.8", "1.0", "1.2"};
+static std::vector<std::string>               nozzle_diameter_vec = {"0.4", "0.15", "0.2", "0.25", "0.3", "0.35", "0.5", "0.6", "0.75", "0.8", "1.0", "1.2", "60"};
 static std::unordered_map<std::string, float> nozzle_diameter_map = {{"0.15", 0.15}, {"0.2", 0.2},   {"0.25", 0.25}, {"0.3", 0.3},
                                                                      {"0.35", 0.35}, {"0.4", 0.4},   {"0.5", 0.5},   {"0.6", 0.6},
-                                                                     {"0.75", 0.75}, {"0.8", 0.8},   {"1.0", 1.0},   {"1.2", 1.2}};
+                                                                     {"0.75", 0.75}, {"0.8", 0.8},   {"1.0", 1.0},   {"1.2", 1.2},
+                                                                     {"60", 60.0}};
 
 static std::set<int> cannot_input_key = {9, 10, 13, 33, 35, 36, 37, 38, 40, 41, 42, 44, 46, 47, 59, 60, 62, 63, 64, 92, 94, 95, 124, 126};
 
@@ -2165,6 +2166,10 @@ bool CreatePrinterPresetDialog::load_system_and_user_presets_with_curr_model(Pre
                                                              ForwardCompatibilitySubstitutionRule::EnableSilent);
         } catch (...) {
             BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "load vendor fonfigs form json failed";
+
+            BOOST_LOG_TRIVIAL(info) << boost::format("DEBUG -> load vendor fonfigs form json failed");
+
+
             MessageDialog dlg(this, _L("The printer model was not found, please reselect."), wxString(SLIC3R_APP_FULL_NAME) + " - " + _L("Info"),
                               wxYES_NO | wxYES_DEFAULT | wxCENTRE);
             dlg.ShowModal();
@@ -2223,20 +2228,27 @@ bool CreatePrinterPresetDialog::load_system_and_user_presets_with_curr_model(Pre
             dlg.ShowModal();
             return false;
         }
+        BOOST_LOG_TRIVIAL(info) << "Loading vendor configs from JSON";
+        BOOST_LOG_TRIVIAL(info) << "Preset path: " << preset_path;
+        BOOST_LOG_TRIVIAL(info) << "Selected vendor ID: " << selected_vendor_id;
+
         try {
             temp_preset_bundle.load_vendor_configs_from_json(preset_path, selected_vendor_id, PresetBundle::LoadConfigBundleAttribute::LoadSystem,
-                                                             ForwardCompatibilitySubstitutionRule::EnableSilent);
+                                                            ForwardCompatibilitySubstitutionRule::EnableSilent);
+            BOOST_LOG_TRIVIAL(info) << "Vendor configs loaded successfully";
         } catch (...) {
-            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << "load template vendor configs form json failed";
+            BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " load template vendor configs from JSON failed";
+            BOOST_LOG_TRIVIAL(info) << boost::format("DEBUG -> load template vendor configs from JSON failed");
+
             MessageDialog dlg(this, _L("The printer model was not found, please reselect."), wxString(SLIC3R_APP_FULL_NAME) + " - " + _L("Info"),
-                              wxYES_NO | wxYES_DEFAULT | wxCENTRE);
+                            wxYES_NO | wxYES_DEFAULT | wxCENTRE);
             dlg.ShowModal();
             return false;
         }
-    }
+            }
 
-    return true;
-}
+            return true;
+        }
 
 void CreatePrinterPresetDialog::generate_process_presets_data(std::vector<Preset const *> presets, std::string nozzle)
 {

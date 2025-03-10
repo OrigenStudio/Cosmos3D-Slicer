@@ -15,8 +15,8 @@
             "sub_path": "process/fdm_process_common.json"
         },
 		{
-             "name": "50mm Standard @Cosmos3D X1 60",
-             "sub_path": "process/50mm Standard @Cosmos3D X1 60.json"
+             "name": "50mm Standard @Cosmos3D X1 60 nozzle",
+             "sub_path": "process/50mm Standard @Cosmos3D X1 60 nozzle.json"
         }
 		
     ],

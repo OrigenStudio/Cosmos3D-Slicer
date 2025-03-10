@@ -9,7 +9,7 @@
     "Generic PLA @Cosmos3D X1"
   ],
   "printer_variant": "60",
-  "default_print_profile": "50mm Standard @Cosmos3D X1 60",
+  "default_print_profile": "50mm Standard @Cosmos3D X1 60 nozzle",
   "nozzle_diameter": [
     "60"
   ],
