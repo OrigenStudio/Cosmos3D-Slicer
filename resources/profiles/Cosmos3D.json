@@ -30,8 +30,8 @@
             "sub_path": "filament/fdm_filament_pla.json"
         },
         {
-            "name": "Generic PLA @Cosmos3D X1",
-            "sub_path": "filament/Generic PLA @Cosmos3D X1.json"
+            "name": "Generic PLA",
+            "sub_path": "filament/Generic PLA.json"
         }
     ],
     "machine_list": [

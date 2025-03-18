@@ -2,7 +2,7 @@
     "type": "filament",
     "filament_id": "CRL99",
     "setting_id": "CRSA04",
-    "name": "Generic PLA @Cosmos3D X1",
+    "name": "Generic PLA",
     "from": "system",
     "instantiation": "true",
     "inherits": "fdm_filament_pla",
@@ -16,6 +16,6 @@
         "8"
     ],
 	"compatible_printers": [
-        "Cosmos3D X1"
+        "Cosmos3D X1 60 nozzle"
     ]
 }
