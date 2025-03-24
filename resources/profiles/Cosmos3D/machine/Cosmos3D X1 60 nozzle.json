@@ -6,7 +6,7 @@
   "inherits": "fdm_machine_common",
   "printer_model": "Cosmos3D X1",
   "default_filament_profile": [
-    "Generic PLA"
+    "Generic Concrete"
   ],
   "printer_variant": "60",
   "default_print_profile": "50mm Standard @Cosmos3D X1 60 nozzle",

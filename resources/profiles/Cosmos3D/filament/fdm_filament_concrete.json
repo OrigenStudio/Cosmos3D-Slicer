@@ -1,6 +1,6 @@
 {
     "type": "filament",
-    "name": "fdm_filament_pla",
+    "name": "fdm_filament_concrete",
     "from": "system",
     "instantiation": "false",
     "inherits": "fdm_filament_common",
@@ -11,7 +11,7 @@
         "12"
     ],
     "filament_type": [
-        "PLA"
+        "Concrete"
     ],
     "filament_density": [
         "1.24"

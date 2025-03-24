@@ -8,5 +8,5 @@
 	"bed_texture": "cosmos_bed_texture.svg",
 	"bed_model": "",
     "hotend_model": "",
-    "default_materials": "Generic PLA"
+    "default_materials": "Generic Concrete"
 }

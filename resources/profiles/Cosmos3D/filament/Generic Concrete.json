@@ -2,10 +2,10 @@
     "type": "filament",
     "filament_id": "CRL99",
     "setting_id": "CRSA04",
-    "name": "Generic PLA",
+    "name": "Generic Concrete",
     "from": "system",
     "instantiation": "true",
-    "inherits": "fdm_filament_pla",
+    "inherits": "fdm_filament_concrete",
     "filament_flow_ratio": [
         "0.98"
     ],

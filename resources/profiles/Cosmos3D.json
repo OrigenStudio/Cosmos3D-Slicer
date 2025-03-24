@@ -26,12 +26,12 @@
             "sub_path": "filament/fdm_filament_common.json"
         },
         {
-            "name": "fdm_filament_pla",
-            "sub_path": "filament/fdm_filament_pla.json"
+            "name": "fdm_filament_concrete",
+            "sub_path": "filament/fdm_filament_concrete.json"
         },
         {
-            "name": "Generic PLA",
-            "sub_path": "filament/Generic PLA.json"
+            "name": "Generic Concrete",
+            "sub_path": "filament/Generic Concrete.json"
         }
     ],
     "machine_list": [
