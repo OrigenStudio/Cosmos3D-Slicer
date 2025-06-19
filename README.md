@@ -73,6 +73,7 @@ Explore the latest developments in Orca Slicer with our nightly builds. Feedback
 - Mac 64-bit  
   - Tools needed: Xcode, Cmake, git, gettext, libtool, automake, autoconf, texinfo
       - You can install most of them by running `brew install cmake gettext libtool automake autoconf texinfo`
+      - If you encounter issues with `cmake` versions, see [Troubleshooting/cmake](#)
   - run `build_release_macos.sh`
   - To build and debug in XCode:
       - run `XCode.app`
@@ -88,6 +89,18 @@ Explore the latest developments in Orca Slicer with our nightly builds. Feedback
   - run 'sudo ./BuildLinux.sh -u'
   - run './BuildLinux.sh -dsir'
 
+## Troubleshooting
+
+### cmake
+
+Newer versions of `cmake` have broken compatibility with `< 3.5`. Using brew directly will install the latest, but you can install a previous one with the following steps:
+1. go to the github specific version file you want to use. [Version 3.31.6 works](https://github.com/Homebrew/homebrew-core/blob/b4e46db74e74a8c1650b38b1da222284ce1ec5ce/Formula/c/cmake.rb), but you can find a specific version following these steps:
+  1. [search in repo file finder](https://github.com/Homebrew/homebrew-core/find/master)
+  1. open the file and click `History`
+  1. find the commit for the desired version and click it
+  1. in the commit page, click the file's more options and "View file"
+1. copy the contents of the file and place it into a local `cmake.rb` file
+1. install it from the file: `brew install ./cmake.rb` (you may be prompted to unlink the already installed version first)
 
 # Note: 
 If you're running Klipper, it's recommended to add the following configuration to your `printer.cfg` file.
