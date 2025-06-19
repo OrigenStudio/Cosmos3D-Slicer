@@ -60,6 +60,10 @@ function HandleModelList( pVal )
 		let OneModel=pModel[n];
 		
 		let strVendor=OneModel['vendor'];
+
+		if (strVendor !== 'Cosmos3D') {
+			continue;
+		}
 		
 		//Add Vendor Html Node
 		if($(".OneVendorBlock[vendor='"+strVendor+"']").length==0)
