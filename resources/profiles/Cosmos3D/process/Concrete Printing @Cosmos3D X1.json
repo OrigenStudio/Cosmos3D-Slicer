@@ -2,6 +2,7 @@
   "type": "process",
   "inherits": "fdm_process_common",
   "name": "Concrete Printing @Cosmos3D X1",
+  "instantiation": "true",
   "default_acceleration": "100",
   "filename_format": "{input_filename_base}_{filament_type[0]}_{print_time}.gcode",
   "gap_infill_speed": "67",
