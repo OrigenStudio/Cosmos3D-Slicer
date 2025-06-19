@@ -965,17 +965,17 @@ void GUI_App::post_init()
         CallAfter([this] {
             bool cw_showed = this->config_wizard_startup();
 
-            std::string http_url = get_http_url(app_config->get_country_code());
-            std::string language = GUI::into_u8(current_language_code());
-            std::string network_ver = Slic3r::NetworkAgent::get_version();
-            bool        sys_preset  = app_config->get("sync_system_preset") == "true";
-            this->preset_updater->sync(http_url, language, network_ver, sys_preset ? preset_bundle : nullptr);
+            // std::string http_url = get_http_url(app_config->get_country_code());
+            // std::string language = GUI::into_u8(current_language_code());
+            // std::string network_ver = Slic3r::NetworkAgent::get_version();
+            // bool        sys_preset  = app_config->get("sync_system_preset") == "true";
+            // this->preset_updater->sync(http_url, language, network_ver, sys_preset ? preset_bundle : nullptr);
 
-            this->check_new_version_sf();
-            if (is_user_login() && app_config->get("stealth_mode") == "false") {
-              // this->check_privacy_version(0);
-              request_user_handle(0);
-            }
+            // this->check_new_version_sf();
+            // if (is_user_login() && app_config->get("stealth_mode") == "false") {
+            //   // this->check_privacy_version(0);
+            //   request_user_handle(0);
+            // }
         });
     }
 
