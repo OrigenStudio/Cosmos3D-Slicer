@@ -695,34 +695,34 @@ Sidebar::Sidebar(Plater *parent)
         p->m_panel_printer_content->SetBackgroundColour(wxColour(255, 255, 255));
 
         PlaterPresetComboBox* combo_printer = new PlaterPresetComboBox(p->m_panel_printer_content, Preset::TYPE_PRINTER);
-        ScalableButton* edit_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "edit");
-        edit_btn->SetToolTip(_L("Click to edit preset"));
-        edit_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
-            {
-                p->editing_filament = -1;
-                if (combo_printer->switch_to_tab())
-                    p->editing_filament = 0;
-            });
-        combo_printer->edit_btn = edit_btn;
+        // ScalableButton* edit_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "edit");
+        // edit_btn->SetToolTip(_L("Click to edit preset"));
+        // edit_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
+        //     {
+        //         p->editing_filament = -1;
+        //         if (combo_printer->switch_to_tab())
+        //             p->editing_filament = 0;
+        //     });
+        // combo_printer->edit_btn = edit_btn;
         p->combo_printer = combo_printer;
 
-        connection_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "monitor_signal_strong");
-        connection_btn->SetBackgroundColour(wxColour(255, 255, 255));
-        connection_btn->SetToolTip(_L("Connection"));
-        connection_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
-            {
-                PhysicalPrinterDialog dlg(this->GetParent());
-                dlg.ShowModal();
-            });
+        // connection_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "monitor_signal_strong");
+        // connection_btn->SetBackgroundColour(wxColour(255, 255, 255));
+        // connection_btn->SetToolTip(_L("Connection"));
+        // connection_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
+        //     {
+        //         PhysicalPrinterDialog dlg(this->GetParent());
+        //         dlg.ShowModal();
+        //     });
 
         wxBoxSizer* vsizer_printer = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer* hsizer_printer = new wxBoxSizer(wxHORIZONTAL);
 
         vsizer_printer->AddSpacer(FromDIP(16));
         hsizer_printer->Add(combo_printer, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
-        hsizer_printer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
+        // hsizer_printer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
         hsizer_printer->Add(FromDIP(8), 0, 0, 0, 0);
-        hsizer_printer->Add(connection_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
+        // hsizer_printer->Add(connection_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
         hsizer_printer->Add(FromDIP(8), 0, 0, 0, 0);
         vsizer_printer->Add(hsizer_printer, 0, wxEXPAND, 0);
 
@@ -978,19 +978,19 @@ Sidebar::Sidebar(Plater *parent)
     }
     combo_and_btn_sizer->Add(p->combos_filament[0], 1, wxALL | wxEXPAND, FromDIP(2))->SetMinSize({-1, FromDIP(30) });
 
-    ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
-    edit_btn->SetBackgroundColour(wxColour(255, 255, 255));
-    edit_btn->SetToolTip(_L("Click to edit preset"));
+    // ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
+    // edit_btn->SetBackgroundColour(wxColour(255, 255, 255));
+    // edit_btn->SetToolTip(_L("Click to edit preset"));
 
-    PlaterPresetComboBox* combobox = p->combos_filament[0];
-    edit_btn->Bind(wxEVT_BUTTON, [this, combobox](wxCommandEvent)
-        {
-            p->editing_filament = 0;
-            combobox->switch_to_tab();
-        });
-    combobox->edit_btn = edit_btn;
+    // PlaterPresetComboBox* combobox = p->combos_filament[0];
+    // edit_btn->Bind(wxEVT_BUTTON, [this, combobox](wxCommandEvent)
+    //     {
+    //         p->editing_filament = 0;
+    //         combobox->switch_to_tab();
+    //     });
+    // combobox->edit_btn = edit_btn;
 
-    combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
+    // combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
     combo_and_btn_sizer->Add(FromDIP(8), 0, 0, 0, 0);
 
     p->combos_filament[0]->set_filament_idx(0);
@@ -1122,19 +1122,19 @@ void Sidebar::init_filament_combo(PlaterPresetComboBox **combo, const int filame
     combo_and_btn_sizer->Add(32 * em / 10, 0, 0, 0, 0);
     combo_and_btn_sizer->Add(del_btn, 0, wxALIGN_CENTER_VERTICAL, 5 * em / 10);
     */
-    ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
-    edit_btn->SetToolTip(_L("Click to edit preset"));
+    // ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
+    // edit_btn->SetToolTip(_L("Click to edit preset"));
 
-    PlaterPresetComboBox* combobox = (*combo);
-    edit_btn->Bind(wxEVT_BUTTON, [this, combobox, filament_idx](wxCommandEvent)
-        {
-            p->editing_filament = -1;
-            if (combobox->switch_to_tab())
-                p->editing_filament = filament_idx; // sync with TabPresetComboxBox's m_filament_idx
-        });
-    combobox->edit_btn = edit_btn;
+    // PlaterPresetComboBox* combobox = (*combo);
+    // edit_btn->Bind(wxEVT_BUTTON, [this, combobox, filament_idx](wxCommandEvent)
+    //     {
+    //         p->editing_filament = -1;
+    //         if (combobox->switch_to_tab())
+    //             p->editing_filament = filament_idx; // sync with TabPresetComboxBox's m_filament_idx
+    //     });
+    // combobox->edit_btn = edit_btn;
 
-    combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
+    // combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(3));
 
     combo_and_btn_sizer->Add(FromDIP(8), 0, 0, 0, 0);
 
@@ -1187,13 +1187,13 @@ void Sidebar::update_all_preset_comboboxes()
 
     if (preset_bundle.use_bbl_network()) {
         //only show connection button for not-BBL printer
-        connection_btn->Hide();
+        // connection_btn->Hide();
         //only show sync-ams button for BBL printer
         ams_btn->Show();
         //update print button default value for bbl or third-party printer
         p_mainframe->set_print_button_to_default(MainFrame::PrintSelectType::ePrintPlate);
     } else {
-        connection_btn->Show();
+        // connection_btn->Show();
         ams_btn->Hide();
         auto print_btn_type = MainFrame::PrintSelectType::eExportGcode;
         wxString url = cfg.opt_string("print_host_webui").empty() ? cfg.opt_string("print_host") : cfg.opt_string("print_host_webui");
