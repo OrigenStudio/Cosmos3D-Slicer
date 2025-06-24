@@ -117,7 +117,6 @@ private:
 
     friend class PartPlateList;
 
-    Pointfs m_raw_shape;
     Pointfs m_shape;
     Pointfs m_exclude_area;
     BoundingBoxf3 m_bounding_box;
@@ -141,6 +140,7 @@ private:
     PickingModel m_lock_icon;
     PickingModel m_plate_settings_icon;
     PickingModel m_plate_name_edit_icon;
+    PickingModel m_move_front_icon;
     GLModel m_plate_idx_icon;
     GLTexture m_texture;
 
@@ -197,9 +197,8 @@ private:
     int picking_id_component(int idx) const;
 
 public:
-    static const unsigned int PLATE_BASE_ID = 255 * 255 * 253;
     static const unsigned int PLATE_NAME_HOVER_ID = 6;
-    static const unsigned int GRABBER_COUNT = 7;
+    static const unsigned int GRABBER_COUNT = 8;
 
     static ColorRGBA SELECT_COLOR;
     static ColorRGBA UNSELECT_COLOR;
@@ -363,7 +362,7 @@ public:
     bool contains(const BoundingBoxf3& bb) const;
     bool intersects(const BoundingBoxf3& bb) const;
 
-    void render(const Transform3d& view_matrix, const Transform3d& projection_matrix, bool bottom, bool only_body = false, bool force_background_color = false, HeightLimitMode mode = HEIGHT_LIMIT_NONE, int hover_id = -1, bool render_cali = false);
+    void render(const Transform3d& view_matrix, const Transform3d& projection_matrix, bool bottom, bool only_body = false, bool force_background_color = false, HeightLimitMode mode = HEIGHT_LIMIT_NONE, int hover_id = -1, bool render_cali = false, bool show_grid = true);
 
     void set_selected();
     void set_unselected();
@@ -546,6 +545,8 @@ class PartPlateList : public ObjectBase
     GLTexture m_logo_texture;
     GLTexture m_del_texture;
     GLTexture m_del_hovered_texture;
+    GLTexture m_move_front_hovered_texture;
+    GLTexture m_move_front_texture;
     GLTexture m_arrange_texture;
     GLTexture m_arrange_hovered_texture;
     GLTexture m_orient_texture;
@@ -656,9 +657,15 @@ public:
         height = m_plate_height;
     }
 
+    // Pantheon: update plates after moving plate to the front
+    void update_plates();
+
     /*basic plate operations*/
     //create an empty plate and return its index
     int create_plate(bool adjust_position = true);
+
+    // duplicate plate
+    int duplicate_plate(int index);
 
     //destroy print which has the index of print_index
     int destroy_print(int print_index);
@@ -682,11 +689,6 @@ public:
     void set_height_limits_mode(PartPlate::HeightLimitMode mode)
     {
         m_height_limit_mode = mode;
-    }
-
-    // SoftFever
-    const std::string& get_logo_texture_filename() const { 
-        return m_logo_texture_filename;
     }
 
     int get_curr_plate_index() const { return m_current_plate; }
@@ -778,7 +780,7 @@ public:
 
     /*rendering related functions*/
     void on_change_color_mode(bool is_dark) { m_is_dark = is_dark; }
-    void render(const Transform3d& view_matrix, const Transform3d& projection_matrix, bool bottom, bool only_current = false, bool only_body = false, int hover_id = -1, bool render_cali = false);
+    void render(const Transform3d& view_matrix, const Transform3d& projection_matrix, bool bottom, bool only_current = false, bool only_body = false, int hover_id = -1, bool render_cali = false, bool show_grid = true);
     void set_render_option(bool bedtype_texture, bool plate_settings);
     void set_render_cali(bool value = true) { render_cali_logo = value; }
     void register_raycasters_for_picking(GLCanvas3D& canvas)

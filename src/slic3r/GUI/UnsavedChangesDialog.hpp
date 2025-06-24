@@ -312,6 +312,8 @@ public:
         {
         }
     };
+public:
+    int getUpdateItemCount() { return m_presetitems.size(); }  
 
 private:
     std::vector<PresetItem> m_presetitems;
@@ -411,8 +413,6 @@ class DiffPresetDialog : public DPIDialog
     wxStaticText*           m_bottom_info_line  { nullptr };
     wxCheckBox*             m_show_all_presets  { nullptr };
     wxCheckBox*             m_use_for_transfer  { nullptr };
-    Button*                 m_transfer_btn      { nullptr };
-    Button*                 m_cancel_btn        { nullptr };
     wxBoxSizer*             m_buttons           { nullptr };
     wxBoxSizer*             m_edit_sizer        { nullptr };
 
@@ -459,7 +459,7 @@ public:
     std::string get_left_preset_name(Preset::Type type);
     std::string get_right_preset_name(Preset::Type type);
 
-    std::vector<std::string> get_selected_options(Preset::Type type) const { return std::move(m_tree->options(type, true)); }
+    std::vector<std::string> get_selected_options(Preset::Type type) const { return m_tree->options(type, true); }
 
     std::array<Preset::Type, 3>         types_list() const;
 

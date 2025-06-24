@@ -71,7 +71,7 @@ void GLGizmoFdmSupports::on_opening()
 
 std::string GLGizmoFdmSupports::on_get_name() const
 {
-    return _u8L("Supports Painting");
+    return _u8L("Support Painting");
 }
 
 bool GLGizmoFdmSupports::on_init()
@@ -101,7 +101,7 @@ bool GLGizmoFdmSupports::on_init()
     m_desc["smart_fill_angle"]      = _L("Smart fill angle");
     m_desc["on_overhangs_only"] = _L("On overhangs only");
 
-    memset(&m_print_instance, sizeof(m_print_instance), 0);
+    memset(&m_print_instance, 0, sizeof(m_print_instance));
     return true;
 }
 

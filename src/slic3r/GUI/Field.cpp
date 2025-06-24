@@ -248,8 +248,6 @@ bool Field::is_matched(const std::string& string, const std::string& pattern)
 	return std::regex_match(string, regex_pattern);
 }
 
-static wxString na_value() { return _(L("N/A")); }
-
 void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true*/)
 {
 	switch (m_opt.type) {
@@ -280,14 +278,14 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
             }
 
 			wxString label = m_opt.full_label.empty() ? _(m_opt.label) : _(m_opt.full_label);
-            show_error(m_parent, from_u8((boost::format(_utf8(L("%s can't be percentage"))) % into_u8(label)).str()));
+            show_error(m_parent, from_u8((boost::format(_utf8(L("%s can't be a percentage"))) % into_u8(label)).str()));
 			set_value(double_to_string(m_opt.min), true);
 			m_value = double(m_opt.min);
 			break;
 		}
         double val;
 
-        bool is_na_value = m_opt.nullable && str == na_value();
+        bool is_na_value = m_opt.nullable && str == m_na_value;
 
         const char dec_sep = is_decimal_separator_point() ? '.' : ',';
         const char dec_sep_alt = dec_sep == '.' ? ',' : '.';
@@ -432,6 +430,16 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
                 str = str_out;
                 set_value(str, true);
             }
+        } else if (m_opt.opt_key == "sparse_infill_rotate_template" || m_opt.opt_key == "solid_infill_rotate_template") {
+            if (!ConfigOptionFloats::validate_string(str.utf8_string())) {
+                show_error(m_parent, format_wxstr(_L("This parameter expects a comma-delimited list of numbers. E.g, \"0,90\".")));
+                wxString old_value(boost::any_cast<std::string>(m_value));
+                this->set_value(old_value, true); // Revert to previous value
+            } else {
+                // Valid string, so update m_value with the new string from the control.
+                m_value = into_u8(str);
+            }
+            break;
         }
 
         m_value = into_u8(str);
@@ -827,7 +835,6 @@ bool TextCtrl::value_was_changed()
 
 void TextCtrl::propagate_value()
 {
-    
     if (!is_defined_input_value<wxTextCtrl>(text_ctrl(), m_opt.type)) { // BBS
 		// on_kill_focus() cause a call of OptionsGroup::reload_config(),
 		// Thus, do it only when it's really needed (when undefined value was input)
@@ -840,11 +847,10 @@ void TextCtrl::propagate_value()
 void TextCtrl::set_value(const boost::any& value, bool change_event/* = false*/) {
     m_disable_change_event = !change_event;
     if (m_opt.nullable) {
-        const bool m_is_na_val = boost::any_cast<wxString>(value) == na_value();
-        if (!m_is_na_val)
+        if (boost::any_cast<wxString>(value) != _(L("N/A")))
             m_last_meaningful_value = value;
-        text_ctrl()->SetValue(m_is_na_val ? na_value() :
-                                            boost::any_cast<wxString>(value)); // BBS
+
+        text_ctrl()->SetValue(boost::any_cast<wxString>(value)); // BBS
     }
     else
         text_ctrl()->SetValue(value.empty() ? "" : boost::any_cast<wxString>(value)); // BBS // BBS: null value
@@ -866,9 +872,14 @@ void TextCtrl::set_last_meaningful_value()
     propagate_value();
 }
 
+void TextCtrl::update_na_value(const boost::any& value)
+{
+    m_na_value = boost::any_cast<wxString>(value);
+}
+
 void TextCtrl::set_na_value()
 {
-    text_ctrl()->SetValue(na_value()); // BBS
+    text_ctrl()->SetValue(m_na_value); // BBS
     propagate_value();
 }
 
@@ -978,10 +989,16 @@ void CheckBox::set_value(const boost::any& value, bool change_event)
 {
     m_disable_change_event = !change_event;
     if (m_opt.nullable) {
-        m_is_na_val = boost::any_cast<unsigned char>(value) == ConfigOptionBoolsNullable::nil_value();
+        const bool is_value_unsigned_char = value.type() == typeid(unsigned char);
+        m_is_na_val = is_value_unsigned_char &&
+                      boost::any_cast<unsigned char>(value) == ConfigOptionBoolsNullable::nil_value();
         if (!m_is_na_val)
-            m_last_meaningful_value = value;
-        dynamic_cast<::CheckBox*>(window)->SetValue(m_is_na_val ? false : boost::any_cast<unsigned char>(value) != 0); // BBS
+            m_last_meaningful_value = is_value_unsigned_char ? value : static_cast<unsigned char>(boost::any_cast<bool>(value));
+
+        const auto bool_value = is_value_unsigned_char ?
+                                    boost::any_cast<unsigned char>(value) != 0 :
+                                    boost::any_cast<bool>(value);
+        dynamic_cast<::CheckBox*>(window)->SetValue(m_is_na_val ? false : bool_value); // BBS
     }
     else if (!value.empty()) // BBS: null value
         dynamic_cast<::CheckBox*>(window)->SetValue(boost::any_cast<bool>(value)); // BBS
@@ -1057,16 +1074,7 @@ void SpinCtrl::BUILD() {
 		break;
 	}
 
-    const int min_val = m_opt.min == INT_MIN
-#ifdef __WXOSX__
-    // We will forcibly set the input value for SpinControl, since the value
-    // inserted from the keyboard is not updated under OSX.
-    // So, we can't set min control value bigger then 0.
-    // Otherwise, it couldn't be possible to input from keyboard value
-    // less then min_val.
-    || m_opt.min > 0
-#endif
-    ? 0 : m_opt.min;
+    const int min_val = m_opt.min == INT_MIN ? 0 : m_opt.min;
 	const int max_val = m_opt.max < 2147483647 ? m_opt.max : 2147483647;
 
     static Builder<SpinInput> builder;
@@ -1163,14 +1171,6 @@ void SpinCtrl::propagate_value()
         if (!m_value.empty()) // BBS: null value
             on_kill_focus();
 	} else {
-#ifdef __WXOSX__
-        // check input value for minimum
-        if (m_opt.min > 0 && tmp_value < m_opt.min) {
-            SpinInput* spin = static_cast<SpinInput*>(window);
-            spin->SetValue(m_opt.min);
-            // spin->GetText()->SetInsertionPointEnd(); // BBS
-        }
-#endif
         auto ctrl = dynamic_cast<SpinInput *>(window);
         if (m_value.empty() 
             ? !ctrl->GetTextCtrl()->GetLabel().IsEmpty()
@@ -1737,7 +1737,7 @@ void Choice::msw_rescale()
 
 void ColourPicker::BUILD()
 {
-	auto size = wxSize(def_width() * m_em_unit, wxDefaultCoord);
+    auto size = wxSize(def_width_wider() * m_em_unit, -1); // ORCA match color picker width
     if (m_opt.height >= 0) size.SetHeight(m_opt.height*m_em_unit);
     if (m_opt.width >= 0) size.SetWidth(m_opt.width*m_em_unit);
 
@@ -1760,7 +1760,24 @@ void ColourPicker::BUILD()
 	// 	// recast as a wxWindow to fit the calling convention
 	window = dynamic_cast<wxWindow*>(temp);
 
-	temp->Bind(wxEVT_COLOURPICKER_CHANGED, ([this](wxCommandEvent e) { on_change_field(); }), temp->GetId());
+	temp->Bind(wxEVT_COLOURPICKER_CHANGED, ([this,temp](wxCommandEvent e) {
+        #ifdef __WXMSW__
+            draw_bmp_btn(temp, temp->GetColour());
+        #endif
+        on_change_field();
+    }), temp->GetId());
+
+    // ORCA reset value to default on right click. previously no way to switch back on windows
+    temp->GetPickerCtrl()->Bind(wxEVT_RIGHT_DOWN, [this, temp](wxMouseEvent e){
+        #ifdef __WXMSW__
+            temp->SetColour(wxTransparentColour);
+            draw_bmp_btn(temp, wxTransparentColour);
+        #else
+            set_undef_value(temp);
+        #endif
+        on_change_field();
+        e.Skip();
+    });
 
 	temp->SetToolTip(get_tooltip_text(clr_str));
 }
@@ -1792,17 +1809,69 @@ void ColourPicker::set_undef_value(wxColourPickerCtrl* field)
     btn->SetBitmapLabel(bmp);
 }
 
+// ORCA match style with button on windows
+void ColourPicker::draw_bmp_btn(wxColourPickerCtrl* field, wxColour color)
+{
+    wxButton* btn = dynamic_cast<wxButton*>(field->GetPickerCtrl());
+
+    if (!btn->GetBitmap().IsOk()) return;
+    btn->SetWindowStyle(wxBORDER_NONE); // ORCA just in case to prevent any overflow
+    btn->SetBackgroundColour(*wxWHITE);
+    wxGetApp().UpdateDarkUI(btn);
+
+    auto create_bitmap = [btn](const wxColour& picker_color,const wxColour& bg_color, bool focus) -> wxBitmap {
+        wxSize  btn_sz = btn->GetSize();
+        wxImage image(btn_sz);
+        image.InitAlpha();
+        memset(image.GetAlpha(), 0, image.GetWidth() * image.GetHeight());
+        wxBitmap   bmp(std::move(image));
+        wxMemoryDC dc(bmp);
+        if (!dc.IsOk()) return bmp;
+        wxGCDC dc2(dc); // just use wxGCDC since bitmap button only used for windows
+
+        dc2.SetPen(focus ? wxPen(wxColour(StateColor::darkModeColorFor(wxColour("#4872E3"))), 1) : *wxTRANSPARENT_PEN);
+        dc2.SetBrush(wxBrush(StateColor::darkModeColorFor(bg_color)));
+        dc2.DrawRoundedRectangle(btn->GetRect(), btn->FromDIP(4));
+
+        int padding = btn->FromDIP(5);
+        dc2.SetPen(*wxTRANSPARENT_PEN);
+        if (picker_color != wxTransparentColour){ // Draw color
+            dc2.SetBrush(wxBrush(picker_color));
+            dc2.DrawRectangle(wxRect(padding, padding, btn_sz.x - 2 * padding, btn_sz.y - 2 * padding));
+        } else { // Draw Pick text
+            // Label::Body_14 rendered much bolder with wxGCDC
+            dc2.SetFont(wxFont(11, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+            wxString text    = _L("Pick") + " " + dots;
+            wxSize   text_sz = dc2.GetTextExtent(text);
+            dc2.SetTextForeground(StateColor::darkModeColorFor(wxColour("#262E30")));
+            dc2.DrawText(text, (btn_sz.x - text_sz.x) / 2, (btn_sz.y - text_sz.y) / 2);
+        }
+        dc.SelectObject(wxNullBitmap);
+        return bmp;
+    };
+
+    btn->SetBitmap(        create_bitmap(color, wxColour("#DFDFDF"), false)); // Normal
+    btn->SetBitmapFocus(   create_bitmap(color, wxColour("#DFDFDF"), true )); // Focus
+    btn->SetBitmapCurrent( create_bitmap(color, wxColour("#D4D4D4"), false)); // Hover
+}
+
 void ColourPicker::set_value(const boost::any& value, bool change_event)
 {
     m_disable_change_event = !change_event;
     const wxString clr_str(boost::any_cast<wxString>(value));
     auto field = dynamic_cast<wxColourPickerCtrl*>(window);
 
-    wxColour clr(clr_str);
-    if (clr_str.IsEmpty() || !clr.IsOk())
-        set_undef_value(field);
-    else
+    #ifdef __WXMSW__
+        wxColour clr = (clr_str.IsEmpty() || !clr.IsOk()) ? wxTransparentColour : clr_str;
         field->SetColour(clr);
+        draw_bmp_btn(field, clr);
+    #else
+        wxColour clr(clr_str);
+        if (clr_str.IsEmpty() || !clr.IsOk())
+            set_undef_value(field);
+        else
+            field->SetColour(clr);
+    #endif
 
     m_disable_change_event = false;
 }
@@ -1824,7 +1893,7 @@ void ColourPicker::msw_rescale()
     Field::msw_rescale();
 
 	wxColourPickerCtrl* field = dynamic_cast<wxColourPickerCtrl*>(window);
-    auto size = wxSize(def_width() * m_em_unit, wxDefaultCoord);
+    auto size = wxSize(def_width_wider() * m_em_unit, -1); // ORCA match color picker width with parameters
     if (m_opt.height >= 0)
         size.SetHeight(m_opt.height * m_em_unit);
     else if (parent_is_custom_ctrl && opt_height > 0)
@@ -1835,16 +1904,23 @@ void ColourPicker::msw_rescale()
     else
         field->SetMinSize(size);
 
-    if (field->GetColour() == wxTransparentColour)
-        set_undef_value(field);
+    #ifdef __WXMSW__
+        draw_bmp_btn(field, field->GetColour());
+    #else
+        if (field->GetColour() == wxTransparentColour)
+            set_undef_value(field);
+    #endif
+
 }
 
 void ColourPicker::sys_color_changed()
 {
 #ifdef _WIN32
-	if (wxWindow* win = this->getWindow())
-		if (wxColourPickerCtrl* picker = dynamic_cast<wxColourPickerCtrl*>(win))
-			wxGetApp().UpdateDarkUI(picker->GetPickerCtrl(), true);
+    if (wxWindow* win = this->getWindow())
+        if (wxColourPickerCtrl* picker = dynamic_cast<wxColourPickerCtrl*>(win)){
+            wxGetApp().UpdateDarkUI(picker->GetPickerCtrl(), true);
+            draw_bmp_btn(picker, picker->GetColour());
+        }
 #endif
 }
 
@@ -1944,6 +2020,7 @@ void PointCtrl::BUILD()
     y_textctrl->Bind(wxEVT_KILL_FOCUS, ([this](wxEvent& e) { e.Skip(); propagate_value(y_textctrl); }), y_textctrl->GetId());
 
 	// 	// recast as a wxWindow to fit the calling convention
+    window = dynamic_cast<wxWindow*>(x_input);
 	sizer = dynamic_cast<wxSizer*>(temp);
 
 	x_textctrl->SetToolTip(get_tooltip_text(X+", "+Y));

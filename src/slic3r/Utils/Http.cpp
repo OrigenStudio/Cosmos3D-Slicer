@@ -184,7 +184,7 @@ Http::priv::priv(const std::string &url)
     set_timeout_max(DEFAULT_TIMEOUT_MAX);
 	::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, log_trace);
 	::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());   // curl makes a copy internally
-	::curl_easy_setopt(curl, CURLOPT_USERAGENT, SLIC3R_APP_NAME "/" SLIC3R_VERSION);
+	::curl_easy_setopt(curl, CURLOPT_USERAGENT, SLIC3R_APP_NAME "/" SoftFever_VERSION);
 	::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer.front());
 #ifdef __WINDOWS__
 	::curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_MAX_TLSv1_2);
@@ -192,6 +192,11 @@ Http::priv::priv(const std::string &url)
 	::curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 	::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+	// https://everything.curl.dev/http/post/expect100.html
+	// remove the Expect: header, it will add a second delay to each request,
+	// if the file is uploaded in packets, it will cause the upload time to be longer
+	headerlist = curl_slist_append(headerlist, "Expect:");
 }
 
 Http::priv::~priv()
@@ -599,6 +604,21 @@ Http& Http::ca_file(const std::string &name)
 	return *this;
 }
 
+Http& Http::form_clear() {
+	if (p) {
+        if (p->form) {
+            ::curl_formfree(p->form);
+            p->form     = nullptr;
+            p->form_end = nullptr;
+        }
+		for (auto &f : p->form_files) {
+			f.ifs.close();
+		}
+		p->form_files.clear();
+
+	}
+	return *this;
+}
 
 Http& Http::form_add(const std::string &name, const std::string &contents)
 {

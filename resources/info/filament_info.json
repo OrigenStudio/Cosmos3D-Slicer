@@ -23,7 +23,8 @@
         "PLA-AERO",
         "PVA",
         "BVOH",
-        "Concrete"
+        "Concrete",
+        "SBS"
     ],
     "high_low_compatible_filament":[
         "HIPS",

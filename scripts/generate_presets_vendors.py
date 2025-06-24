@@ -18,8 +18,10 @@ for entry in profiles_dir.glob('*.json'):
     if entry.is_file():
         entry_info = json.loads(entry.read_text())
         vendor_name = entry_info.get('name', None)
-        if vendor_name:
+        if vendor_name and vendor_name != 'Custom Printer':
             models = [machine.get('name', None) for machine in entry_info.get('machine_model_list', []) if machine.get('name', None)]
+            if not models:
+                continue
             printers[vendor_name] = models
 
 vendor_names = [f'"{vendor_name}",' for vendor_name in sorted(printers.keys(), key=str.casefold)]
@@ -43,7 +45,7 @@ for vendor_name in sorted(printers.keys(), key=str.casefold):
     
     models_formatted += '},\n     '
 
-models_formatted = models_formatted.rstrip()[:-1]
+models_formatted = models_formatted.rstrip()[:-1] + '}'
 print(models_formatted)
 
 
@@ -70,15 +72,16 @@ filament_vendors = [
     'California Filament',
     'Capricorn',
     'CC3D',
+    'CERPRiSE',
     'colorFabb',
     'Comgrow',
     'Cookiecad',
     'Cosmos3D',
     'Creality',
-    'CERPRiSE',
     'Das Filament',
     'DO3D',
     'DOW',
+    'DREMC',
     'DSM',
     'Duramic',
     'ELEGOO',
@@ -90,11 +93,13 @@ filament_vendors = [
     'Fiberlogy',
     'FilaCube',
     'Filamentive',
+    'FilamentOne',
     'Fillamentum',
+    'Fil X',
     'FLASHFORGE',
     'Formfutura',
     'Francofil',
-    'FilamentOne',
+    'FusRock',
     'GEEETECH',
     'Giantarm',
     'Gizmo Dorks',
@@ -110,6 +115,7 @@ filament_vendors = [
     'Justmaker',
     'Keene Village Plastics',
     'Kexcelled',
+    'LDO',
     'MakerBot',
     'MatterHackers',
     'MIKA3D',
@@ -146,7 +152,7 @@ filament_vendors = [
     'Yousu',
     'Ziro',
     'Zyltech',
-    ]
+]
 
 filament_vendors_formatted = [f'"{vendor_name}",' for vendor_name in filament_vendors]
 fil_col_width = len(max(filament_vendors_formatted, key=len))

@@ -6,16 +6,19 @@
 #include "Geometry.hpp"
 #include "ObjectID.hpp"
 #include "Point.hpp"
+#include "AppConfig.hpp"
 #include "PrintConfig.hpp"
 #include "Slicing.hpp"
 #include "SLA/SupportPoint.hpp"
 #include "SLA/Hollowing.hpp"
+#include "BrimEarsPoint.hpp"
 #include "TriangleMesh.hpp"
 #include "CustomGCode.hpp"
 #include "calib.hpp"
 #include "enum_bitmask.hpp"
 #include "TextConfiguration.hpp"
 #include "EmbossShape.hpp"
+#include "TriangleSelector.hpp"
 
 //BBS: add bbs 3mf
 #include "Format/bbs_3mf.hpp"
@@ -382,9 +385,7 @@ public:
     // Holes to be drilled into the object so resin can flow out
     sla::DrainHoles         sla_drain_holes;
 
-    // Connectors to be added into the object before cut and are used to create a solid/negative volumes during a cut perform
-    CutConnectors           cut_connectors;
-    CutObjectBase           cut_id;
+    BrimPoints              brim_points;
 
     /* This vector accumulates the total translation applied to the object by the
         center_around_origin() method. Callers might want to apply the same translation
@@ -394,6 +395,10 @@ public:
 
     // BBS: save for compare with new load volumes
     std::vector<ObjectID>   volume_ids;
+
+    // Connectors to be added into the object before cut and are used to create a solid/negative volumes during a cut perform
+    CutConnectors cut_connectors;
+    CutObjectBase cut_id;
 
     Model*                  get_model() { return m_model; }
     const Model*            get_model() const { return m_model; }
@@ -406,8 +411,8 @@ public:
             return global_config.option<T>(config_option);
     }
 
-    ModelVolume*            add_volume(const TriangleMesh &mesh);
-    ModelVolume*            add_volume(TriangleMesh &&mesh, ModelVolumeType type = ModelVolumeType::MODEL_PART);
+    ModelVolume*            add_volume(const TriangleMesh &mesh, bool modify_to_center_geometry = true);
+    ModelVolume*            add_volume(TriangleMesh &&mesh, ModelVolumeType type = ModelVolumeType::MODEL_PART, bool modify_to_center_geometry = true);
     ModelVolume*            add_volume(const ModelVolume &volume, ModelVolumeType type = ModelVolumeType::INVALID);
     ModelVolume*            add_volume(const ModelVolume &volume, TriangleMesh &&mesh);
     ModelVolume*            add_volume_with_shared_mesh(const ModelVolume &other, ModelVolumeType type = ModelVolumeType::MODEL_PART);
@@ -672,7 +677,7 @@ private:
         Internal::StaticSerializationWrapper<ModelConfigObject const> config_wrapper(config);
         Internal::StaticSerializationWrapper<LayerHeightProfile const> layer_heigth_profile_wrapper(layer_height_profile);
         ar(name, module_name, input_file, instances, volumes, config_wrapper, layer_config_ranges, layer_heigth_profile_wrapper,
-            sla_support_points, sla_points_status, sla_drain_holes, printable, origin_translation,
+            sla_support_points, sla_points_status, sla_drain_holes, printable, origin_translation, brim_points,
             m_bounding_box_approx, m_bounding_box_approx_valid, 
             m_bounding_box_exact, m_bounding_box_exact_valid, m_min_max_z_valid,
             m_raw_bounding_box, m_raw_bounding_box_valid, m_raw_mesh_bounding_box, m_raw_mesh_bounding_box_valid,
@@ -685,7 +690,7 @@ private:
         // BBS: add backup, check modify
         SaveObjectGaurd gaurd(*this);
         ar(name, module_name, input_file, instances, volumes, config_wrapper, layer_config_ranges, layer_heigth_profile_wrapper,
-            sla_support_points, sla_points_status, sla_drain_holes, printable, origin_translation,
+            sla_support_points, sla_points_status, sla_drain_holes, printable, origin_translation, brim_points,
             m_bounding_box_approx, m_bounding_box_approx_valid, 
             m_bounding_box_exact, m_bounding_box_exact_valid, m_min_max_z_valid,
             m_raw_bounding_box, m_raw_bounding_box_valid, m_raw_mesh_bounding_box, m_raw_mesh_bounding_box_valid,
@@ -704,31 +709,6 @@ private:
     void update_min_max_z();
 };
 
-enum class EnforcerBlockerType : int8_t {
-    // Maximum is 3. The value is serialized in TriangleSelector into 2 bits.
-    NONE      = 0,
-    ENFORCER  = 1,
-    BLOCKER   = 2,
-    // Maximum is 15. The value is serialized in TriangleSelector into 6 bits using a 2 bit prefix code.
-    Extruder1 = ENFORCER,
-    Extruder2 = BLOCKER,
-    Extruder3,
-    Extruder4,
-    Extruder5,
-    Extruder6,
-    Extruder7,
-    Extruder8,
-    Extruder9,
-    Extruder10,
-    Extruder11,
-    Extruder12,
-    Extruder13,
-    Extruder14,
-    Extruder15,
-    Extruder16,
-    ExtruderMax = Extruder16
-};
-
 enum class ConversionType : int {
     CONV_TO_INCH,
     CONV_FROM_INCH,
@@ -745,9 +725,9 @@ enum class En3mfType : int {
 class FacetsAnnotation final : public ObjectWithTimestamp {
 public:
     // Assign the content if the timestamp differs, don't assign an ObjectID.
-    void assign(const FacetsAnnotation& rhs) { if (! this->timestamp_matches(rhs)) { m_data = rhs.m_data; this->copy_timestamp(rhs); } }
-    void assign(FacetsAnnotation&& rhs) { if (! this->timestamp_matches(rhs)) { m_data = std::move(rhs.m_data); this->copy_timestamp(rhs); } }
-    const std::pair<std::vector<std::pair<int, int>>, std::vector<bool>>& get_data() const throw() { return m_data; }
+    void assign(const FacetsAnnotation &rhs) { if (! this->timestamp_matches(rhs)) { m_data = rhs.m_data; this->copy_timestamp(rhs); } }
+    void assign(FacetsAnnotation &&rhs) { if (! this->timestamp_matches(rhs)) { m_data = std::move(rhs.m_data); this->copy_timestamp(rhs); } }
+    const TriangleSelector::TriangleSplittingData &get_data() const noexcept { return m_data; }
     bool set(const TriangleSelector& selector);
     indexed_triangle_set get_facets(const ModelVolume& mv, EnforcerBlockerType type) const;
     // BBS
@@ -755,7 +735,7 @@ public:
     void set_enforcer_block_type_limit(const ModelVolume& mv, EnforcerBlockerType max_type);
     indexed_triangle_set get_facets_strict(const ModelVolume& mv, EnforcerBlockerType type) const;
     bool has_facets(const ModelVolume& mv, EnforcerBlockerType type) const;
-    bool empty() const { return m_data.first.empty(); }
+    bool empty() const { return m_data.triangles_to_split.empty(); }
 
     // Following method clears the config and increases its timestamp, so the deleted
     // state is considered changed from perspective of the undo/redo stack.
@@ -765,11 +745,11 @@ public:
     std::string get_triangle_as_string(int i) const;
 
     // Before deserialization, reserve space for n_triangles.
-    void reserve(int n_triangles) { m_data.first.reserve(n_triangles); }
+    void reserve(int n_triangles) { m_data.triangles_to_split.reserve(n_triangles); }
     // Deserialize triangles one by one, with strictly increasing triangle_id.
     void set_triangle_from_string(int triangle_id, const std::string& str);
     // After deserializing the last triangle, shrink data to fit.
-    void shrink_to_fit() { m_data.first.shrink_to_fit(); m_data.second.shrink_to_fit(); }
+    void shrink_to_fit() { m_data.triangles_to_split.shrink_to_fit(); m_data.bitstream.shrink_to_fit(); }
     bool equals(const FacetsAnnotation &other) const;
 
 private:
@@ -796,7 +776,7 @@ private:
         ar(cereal::base_class<ObjectWithTimestamp>(this), m_data);
     }
 
-    std::pair<std::vector<std::pair<int, int>>, std::vector<bool>> m_data;
+    TriangleSelector::TriangleSplittingData m_data;
 
     // To access set_new_unique_id() when copy / pasting a ModelVolume.
     friend class ModelVolume;
@@ -1015,6 +995,10 @@ public:
     bool is_fdm_support_painted() const { return !this->supported_facets.empty(); }
     bool is_seam_painted() const { return !this->seam_facets.empty(); }
     bool is_mm_painted() const { return !this->mmu_segmentation_facets.empty(); }
+    
+    // Orca: Implement prusa's filament shrink compensation approach
+    // Returns 0-based indices of extruders painted by multi-material painting gizmo.
+     std::vector<size_t> get_extruders_from_multi_material_painting() const;
 
 protected:
 	friend class Print;
@@ -1261,11 +1245,13 @@ public:
         m_assemble_initialized = true;
         m_assemble_transformation = transformation;
     }
-    void set_assemble_from_transform(Transform3d& transform) {
+    void set_assemble_from_transform(const Transform3d& transform) {
         m_assemble_initialized = true;
         m_assemble_transformation.set_matrix(transform);
     }
+    Vec3d get_assemble_offset() const {return m_assemble_transformation.get_offset(); }
     void set_assemble_offset(const Vec3d& offset) { m_assemble_transformation.set_offset(offset); }
+    void set_assemble_rotation(const Vec3d &rotation) { m_assemble_transformation.set_rotation(rotation); }
     void rotate_assemble(double angle, const Vec3d& axis) {
         m_assemble_transformation.set_rotation(m_assemble_transformation.get_rotation() + Geometry::extract_euler_angles(Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis)).toRotationMatrix()));
     }
@@ -1342,6 +1328,8 @@ public:
         this->object->invalidate_bounding_box();
     }
 
+    ModelInstanceEPrintVolumeState calc_print_volume_state(const BuildVolume& build_volume) const;
+
 protected:
     friend class Print;
     friend class SLAPrint;
@@ -1350,6 +1338,12 @@ protected:
 
     explicit ModelInstance(const ModelInstance &rhs) = default;
     void     set_model_object(ModelObject *model_object) { object = model_object; }
+
+    ModelInstanceEPrintVolumeState update_print_volume_state(const BuildVolume& build_volume)
+    {
+        print_volume_state = calc_print_volume_state(build_volume);
+        return print_volume_state;
+    }
 
 private:
     // Parent object, owning this instance.
@@ -1547,6 +1541,15 @@ public:
 
     OBJECTBASE_DERIVED_COPY_MOVE_CLONE(Model)
 
+    static Model read_from_step(const std::string&                                      input_file,
+                                LoadStrategy                                            options,
+                                ImportStepProgressFn                                    stepFn,
+                                StepIsUtf8Fn                                            stepIsUtf8Fn,
+                                std::function<int(Slic3r::Step&, double&, double&, bool&)>     step_mesh_fn,
+                                double                                                  linear_defletion,
+                                double                                                  angle_defletion,
+                                bool                                                    is_split_compound);
+
     //BBS: add part plate related logic
     // BBS: backup
     //BBS: is_xxx is used for is_bbs_3mf when loading 3mf, is used for is_inches when loading amf
@@ -1556,8 +1559,6 @@ public:
         LoadStrategy options = LoadStrategy::AddDefaultInstances, PlateDataPtrs* plate_data = nullptr,
         std::vector<Preset*>* project_presets = nullptr, bool* is_xxx = nullptr, Semver* file_version = nullptr, Import3mfProgressFn proFn = nullptr,
                                 ImportstlProgressFn        stlFn                = nullptr,
-                                ImportStepProgressFn       stepFn               = nullptr,
-                                StepIsUtf8Fn               stepIsUtf8Fn         = nullptr,
                                 BBLProject *               project              = nullptr,
                                 int                        plate_id             = 0,
                                 ObjImportColorFn           objFn                = nullptr
@@ -1713,6 +1714,8 @@ bool model_custom_seam_data_changed(const ModelObject& mo, const ModelObject& mo
 // Test whether the now ModelObject has newer MMU segmentation data than the old one.
 // The function assumes that volumes list is synchronized.
 extern bool model_mmu_segmentation_data_changed(const ModelObject& mo, const ModelObject& mo_new);
+
+bool model_brim_points_data_changed(const ModelObject& mo, const ModelObject& mo_new);
 
 // If the model has multi-part objects, then it is currently not supported by the SLA mode.
 // Either the model cannot be loaded, or a SLA printer has to be activated.
