@@ -717,25 +717,25 @@ PlaterPresetComboBox::PlaterPresetComboBox(wxWindow *parent, Preset::Type preset
         });
     }
     else {
-        edit_btn = new ScalableButton(parent, wxID_ANY, "cog");
-        edit_btn->SetToolTip(_L("Click to edit preset"));
+//         edit_btn = new ScalableButton(parent, wxID_ANY, "cog");
+//         edit_btn->SetToolTip(_L("Click to edit preset"));
 
-        edit_btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent)
-            {
-                // In a case of a physical printer, for its editing open PhysicalPrinterDialog
-                if (m_type == Preset::TYPE_PRINTER
-#ifdef __linux__
-                    // To edit extruder color from the sidebar
-                    || m_type == Preset::TYPE_FILAMENT
-#endif //__linux__
-                    )
-                    show_edit_menu();
-                else
-                    switch_to_tab();
-            });
-#ifdef __linux__
-        edit_btn->Hide();
-#endif //__linux__
+//         edit_btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent)
+//             {
+//                 // In a case of a physical printer, for its editing open PhysicalPrinterDialog
+//                 if (m_type == Preset::TYPE_PRINTER
+// #ifdef __linux__
+//                     // To edit extruder color from the sidebar
+//                     || m_type == Preset::TYPE_FILAMENT
+// #endif //__linux__
+//                     )
+//                     show_edit_menu();
+//                 else
+//                     switch_to_tab();
+//             });
+// #ifdef __linux__
+//         edit_btn->Hide();
+// #endif //__linux__
     }
 }
 
@@ -1104,7 +1104,7 @@ void PlaterPresetComboBox::update()
             set_label_marker(Append(separator(L("Add/Remove materials")), *bmp), LABEL_ITEM_WIZARD_MATERIALS);
         else {
             set_label_marker(Append(separator(L("Select/Remove printers (system presets)")), *bmp), LABEL_ITEM_WIZARD_PRINTERS);
-            set_label_marker(Append(separator(L("Create printer")), *bmp), LABEL_ITEM_WIZARD_ADD_PRINTERS);
+            // set_label_marker(Append(separator(L("Create printer")), *bmp), LABEL_ITEM_WIZARD_ADD_PRINTERS);
         }
     }
 
