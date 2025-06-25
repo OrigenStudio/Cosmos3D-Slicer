@@ -98,6 +98,10 @@ function SortUI()
 		let fSelect=OneFila['selected'];
 		let fModel=OneFila['models']
 		
+		if (fType !== "Concrete") {
+			continue;
+		}
+		
         let bFind=false;		
 		//let bCheck=$("#MachineList input:first").prop("checked");
 		if( fModel=='')

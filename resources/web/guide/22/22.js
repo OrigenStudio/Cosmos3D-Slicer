@@ -61,6 +61,10 @@ function SortUI()
 	{
 		let OneMode=m_ProfileItem["model"][n];
 		
+		if (OneMode["vendor"] !== 'Cosmos3D') {
+			continue;
+		}
+
 		if( OneMode["nozzle_selected"]!="" )
 			ModelList.push(OneMode);
 	}
@@ -124,7 +128,11 @@ function SortUI()
 		let fType=OneFila['type'];
 		let fSelect=OneFila['selected'];
 		let fModel=OneFila['models']
-		
+
+		if (fType !== "Concrete") {
+			continue;
+		}
+
 		//alert( fWholeName+' - '+fShortName+' - '+fVendor+' - '+fType+' - '+fSelect+' - '+fModel );
 		
 //		if(OneFila['name'].indexOf("Bambu PA-CF")>=0)
