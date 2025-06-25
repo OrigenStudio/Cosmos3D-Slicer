@@ -227,8 +227,8 @@ input[type="checkbox"]::before {
 }
 
 input[type="checkbox"]:checked {
-	border-color:#009688;
-	background-color:#009688;
+	border-color:#4872E3;
+	background-color:#4872E3;
 }
 
 input[type="checkbox"]:checked::before {

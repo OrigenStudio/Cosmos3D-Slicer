@@ -153,7 +153,7 @@
 
 .searchTerm:focus{
 	color: #363636;       /* ORCA Searchbox > use normal text color */
-	border-color:#009688; /* ORCA Searchbox > highlight border color when focused. like on normal UI */
+	border-color:#4872E3; /* ORCA Searchbox > highlight border color when focused. like on normal UI */
 }
 @media (prefers-color-scheme: dark) {  /* ORCA Searchbox > add dark mode support */
 	.searchTerm:focus{color: #FFFFFF}
