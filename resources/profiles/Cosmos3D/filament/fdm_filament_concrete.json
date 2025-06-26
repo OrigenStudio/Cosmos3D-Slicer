@@ -8,16 +8,19 @@
         "100"
     ],
     "filament_max_volumetric_speed": [
-        "12"
+        "2000000"
     ],
     "filament_type": [
         "Concrete"
     ],
     "filament_density": [
-        "1.24"
+        "3"
     ],
     "filament_cost": [
         "20"
+    ],
+    "filament_diameter": [
+        "60"
     ],
     "cool_plate_temp" : [
         "0"

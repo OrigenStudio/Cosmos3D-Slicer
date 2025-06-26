@@ -10,7 +10,9 @@
         "0.98"
     ],
     "filament_max_volumetric_speed": [
-        "30"
+        "2000000"
+    ],"filament_diameter": [
+        "50"
     ],
     "slow_down_layer_time": [
         "8"
