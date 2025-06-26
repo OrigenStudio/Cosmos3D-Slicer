@@ -750,15 +750,15 @@ Sidebar::Sidebar(Plater *parent)
         p->m_panel_printer_content->SetBackgroundColour(wxColour(255, 255, 255));
 
         PlaterPresetComboBox* combo_printer = new PlaterPresetComboBox(p->m_panel_printer_content, Preset::TYPE_PRINTER);
-        // ScalableButton* edit_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "edit");
-        // edit_btn->SetToolTip(_L("Click to edit preset"));
-        // edit_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
-        //     {
-        //         p->editing_filament = -1;
-        //         if (combo_printer->switch_to_tab())
-        //             p->editing_filament = 0;
-        //     });
-        // combo_printer->edit_btn = edit_btn;
+        ScalableButton* edit_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "edit");
+        edit_btn->SetToolTip(_L("Click to edit preset"));
+        edit_btn->Bind(wxEVT_BUTTON, [this, combo_printer](wxCommandEvent)
+            {
+                p->editing_filament = -1;
+                if (combo_printer->switch_to_tab())
+                    p->editing_filament = 0;
+            });
+        combo_printer->edit_btn = edit_btn;
         p->combo_printer = combo_printer;
 
         // connection_btn = new ScalableButton(p->m_panel_printer_content, wxID_ANY, "monitor_signal_strong");
@@ -775,7 +775,7 @@ Sidebar::Sidebar(Plater *parent)
 
         vsizer_printer->AddSpacer(FromDIP(16));
         hsizer_printer->Add(combo_printer, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ContentMargin()));
-        // hsizer_printer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()));
+        hsizer_printer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()));
         // hsizer_printer->Add(connection_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::IconSpacing()));
         hsizer_printer->AddSpacer(FromDIP(SidebarProps::ContentMargin()));
         vsizer_printer->Add(hsizer_printer, 0, wxEXPAND, 0);
@@ -1038,19 +1038,19 @@ Sidebar::Sidebar(Plater *parent)
     }
     combo_and_btn_sizer->Add(p->combos_filament[0], 1, wxALL | wxEXPAND, FromDIP(2))->SetMinSize({-1, FromDIP(30) });
 
-    // ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
-    // edit_btn->SetBackgroundColour(wxColour(255, 255, 255));
-    // edit_btn->SetToolTip(_L("Click to edit preset"));
+    ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
+    edit_btn->SetBackgroundColour(wxColour(255, 255, 255));
+    edit_btn->SetToolTip(_L("Click to edit preset"));
 
-    // PlaterPresetComboBox* combobox = p->combos_filament[0];
-    // edit_btn->Bind(wxEVT_BUTTON, [this, combobox](wxCommandEvent)
-    //     {
-    //         p->editing_filament = 0;
-    //         combobox->switch_to_tab();
-    //     });
-    // combobox->edit_btn = edit_btn;
+    PlaterPresetComboBox* combobox = p->combos_filament[0];
+    edit_btn->Bind(wxEVT_BUTTON, [this, combobox](wxCommandEvent)
+        {
+            p->editing_filament = 0;
+            combobox->switch_to_tab();
+        });
+    combobox->edit_btn = edit_btn;
 
-    // combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()) - FromDIP(2)); // ElementSpacing - 2 (from combo box))
+    combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()) - FromDIP(2)); // ElementSpacing - 2 (from combo box))
     combo_and_btn_sizer->AddSpacer(FromDIP(SidebarProps::ContentMargin()));
 
     p->combos_filament[0]->set_filament_idx(0);
@@ -1210,19 +1210,19 @@ void Sidebar::init_filament_combo(PlaterPresetComboBox **combo, const int filame
     combo_and_btn_sizer->Add(32 * em / 10, 0, 0, 0, 0);
     combo_and_btn_sizer->Add(del_btn, 0, wxALIGN_CENTER_VERTICAL, 5 * em / 10);
     */
-    // ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
-    // edit_btn->SetToolTip(_L("Click to edit preset"));
+    ScalableButton* edit_btn = new ScalableButton(p->m_panel_filament_content, wxID_ANY, "edit");
+    edit_btn->SetToolTip(_L("Click to edit preset"));
 
-    // PlaterPresetComboBox* combobox = (*combo);
-    // edit_btn->Bind(wxEVT_BUTTON, [this, combobox, filament_idx](wxCommandEvent)
-    //     {
-    //         p->editing_filament = -1;
-    //         if (combobox->switch_to_tab())
-    //             p->editing_filament = filament_idx; // sync with TabPresetComboxBox's m_filament_idx
-    //     });
-    // combobox->edit_btn = edit_btn;
+    PlaterPresetComboBox* combobox = (*combo);
+    edit_btn->Bind(wxEVT_BUTTON, [this, combobox, filament_idx](wxCommandEvent)
+        {
+            p->editing_filament = -1;
+            if (combobox->switch_to_tab())
+                p->editing_filament = filament_idx; // sync with TabPresetComboxBox's m_filament_idx
+        });
+    combobox->edit_btn = edit_btn;
 
-    // combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()) - FromDIP(2)); // ElementSpacing - 2 (from combo box))
+    combo_and_btn_sizer->Add(edit_btn, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(SidebarProps::ElementSpacing()) - FromDIP(2)); // ElementSpacing - 2 (from combo box))
 
     combo_and_btn_sizer->AddSpacer(FromDIP(SidebarProps::ContentMargin()));
 
