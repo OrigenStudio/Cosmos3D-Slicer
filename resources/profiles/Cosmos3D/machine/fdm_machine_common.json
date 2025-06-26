@@ -24,6 +24,9 @@
     "machine_max_acceleration_retracting": [
         "1000"
     ],
+    "machine_max_acceleration_travel": [
+        "500"
+    ],
     "machine_max_acceleration_x": [
         "10000"
     ],
@@ -64,10 +67,10 @@
         "0"
     ],
     "max_layer_height": [
-        "30"
+        "40"
     ],
     "min_layer_height": [
-        "15"
+        "20"
     ],
     "printable_height": "3000",
     "extruder_clearance_radius": "1000",
@@ -79,7 +82,7 @@
     "printer_settings_id": "",
     "printer_variant": "60",
     "retraction_minimum_travel": [
-        "0"
+        "2"
     ],
     "retract_before_wipe": [
         "70%"
@@ -91,10 +94,10 @@
         "5"
     ],
     "retract_length_toolchange": [
-        "1"
+        "2"
     ],
     "z_hop": [
-        "0"
+        "0.4"
     ],
     "retract_restart_extra": [
         "0"
@@ -113,5 +116,6 @@
     "z_hop_types": "Normal Lift",
     "default_print_profile": "50mm Standard @Cosmos3D X1 60 nozzle",
     "machine_start_gcode": "COSMOS",
-    "machine_end_gcode": "N3960 END: G91 G1 X100 Z20\nN3970\nN3980 REPEAT BEGIN END P=50\nN3990\nN4000 CT Y-80\nN4010 M5\nN4020 M30"
+    "machine_end_gcode": "N3960 END: G91 G1 X100 Z20\nN3970\nN3980 REPEAT BEGIN END P=50\nN3990\nN4000 CT Y-80\nN4010 M5\nN4020 M30",
+    "before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\nG92 E0\n;[layer_z]\n\n"
 }
