@@ -302,10 +302,10 @@ void Tab::create_preset_tab()
          Freeze();
         if (m_presets_choice) m_presets_choice->Show();
 
-        m_btn_save_preset->Show();
-        m_btn_delete_preset->Show(); // ORCA: fixes delete preset button visible while search box focused
+        // m_btn_save_preset->Show();
+        // m_btn_delete_preset->Show(); // ORCA: fixes delete preset button visible while search box focused
         m_undo_btn->Show();          // ORCA: fixes revert preset button visible while search box focused
-        m_btn_search->Show();
+        // m_btn_search->Show();
         m_search_item->Hide();
 
         m_search_item->Refresh();
