@@ -3865,7 +3865,7 @@ void TabPrinter::build_fff()
         optgroup->append_single_option_line(option);
 
         optgroup = page->new_optgroup(L("Post-processing Scripts"), L"param_gcode", 0);
-        option = optgroup->get_option("post_process");
+        option = optgroup->get_option("printer_post_process");
         option.opt.full_width = true;
         option.opt.is_code = true;
         option.opt.height = 15;

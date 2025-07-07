@@ -237,12 +237,18 @@ void gcode_add_line_number(const std::string& path, const DynamicPrintConfig& co
 // The post-processing script may change the output_name.
 bool run_post_process_scripts(std::string &src_path, bool make_copy, const std::string &host, std::string &output_name, const DynamicPrintConfig &config)
 {
+    // Get both print-level and printer-level post-processing scripts
     const auto *post_process = config.opt<ConfigOptionStrings>("post_process");
-    if (// likely running in SLA mode
-        post_process == nullptr || 
-        // no post-processing script
-        post_process->values.empty())
+    const auto *printer_post_process = config.opt<ConfigOptionStrings>("printer_post_process");
+    
+    // Check if we have any post-processing scripts to run
+    bool has_print_scripts = (post_process != nullptr && !post_process->values.empty());
+    bool has_printer_scripts = (printer_post_process != nullptr && !printer_post_process->values.empty());
+    
+    if (!has_print_scripts && !has_printer_scripts) {
+        // No post-processing scripts defined
         return false;
+    }
 
     std::string path;
     if (make_copy) {
@@ -301,35 +307,48 @@ bool run_post_process_scripts(std::string &src_path, bool make_copy, const std::
     remove_output_name_file();
 
     try {
-        for (const std::string &scripts : post_process->values) {
-    		std::vector<std::string> lines;
-    		boost::split(lines, scripts, boost::is_any_of("\r\n"));
-            for (std::string script : lines) {
-                // Ignore empty post processing script lines.
-                boost::trim(script);
-                if (script.empty())
-                    continue;
-                BOOST_LOG_TRIVIAL(info) << "Executing script " << script << " on file " << path;
-                std::string std_err;
-                const int result = run_script(script, gcode_file.string(), std_err);
-                if (result != 0) {
-                    const std::string msg = std_err.empty() ? (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%") % script % path % result).str()
-                        : (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%\nOutput:\n%4%") % script % path % result % std_err).str();
-                    BOOST_LOG_TRIVIAL(error) << msg;
-                    delete_copy();
-                    throw Slic3r::RuntimeError(msg);
-                }
-                if (! boost::filesystem::exists(gcode_file)) {
-                    const std::string msg = (boost::format(_(L(
-                        "Post-processing script %1% failed.\n\n"
-                        "The post-processing script is expected to change the G-code file %2% in place, but the G-code file was deleted and likely saved under a new name.\n"
-                        "Please adjust the post-processing script to change the G-code in place and consult the manual on how to optionally rename the post-processed G-code file.\n")))
-                        % script % path).str();
-                    BOOST_LOG_TRIVIAL(error) << msg;
-                    throw Slic3r::RuntimeError(msg);
+        // Helper function to execute a set of post-processing scripts
+        auto execute_scripts = [&](const ConfigOptionStrings* scripts_config, const std::string& script_type) {
+            if (scripts_config == nullptr || scripts_config->values.empty()) {
+                return;
+            }
+            
+            for (const std::string &scripts : scripts_config->values) {
+        		std::vector<std::string> lines;
+        		boost::split(lines, scripts, boost::is_any_of("\r\n"));
+                for (std::string script : lines) {
+                    // Ignore empty post processing script lines.
+                    boost::trim(script);
+                    if (script.empty())
+                        continue;
+                    BOOST_LOG_TRIVIAL(info) << "Executing " << script_type << " script " << script << " on file " << path;
+                    std::string std_err;
+                    const int result = run_script(script, gcode_file.string(), std_err);
+                    if (result != 0) {
+                        const std::string msg = std_err.empty() ? (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%") % script % path % result).str()
+                            : (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%\nOutput:\n%4%") % script % path % result % std_err).str();
+                        BOOST_LOG_TRIVIAL(error) << msg;
+                        delete_copy();
+                        throw Slic3r::RuntimeError(msg);
+                    }
+                    if (! boost::filesystem::exists(gcode_file)) {
+                        const std::string msg = (boost::format(_(L(
+                            "Post-processing script %1% failed.\n\n"
+                            "The post-processing script is expected to change the G-code file %2% in place, but the G-code file was deleted and likely saved under a new name.\n"
+                            "Please adjust the post-processing script to change the G-code in place and consult the manual on how to optionally rename the post-processed G-code file.\n")))
+                            % script % path).str();
+                        BOOST_LOG_TRIVIAL(error) << msg;
+                        throw Slic3r::RuntimeError(msg);
+                    }
                 }
             }
-        }
+        };
+        
+        // Execute printer-level post-processing scripts first
+        execute_scripts(printer_post_process, "printer-level");
+        
+        // Then execute print-level post-processing scripts
+        execute_scripts(post_process, "print-level");
         if (boost::filesystem::exists(path_output_name)) {
             try {
                 // Read a single line from path_output_name, which should contain the new output name of the post-processed G-code.
