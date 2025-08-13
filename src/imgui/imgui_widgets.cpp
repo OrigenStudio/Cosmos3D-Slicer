@@ -43,7 +43,6 @@ Index of this file:
 #include <locale.h>
 #include <algorithm>
 // System includes
-#include <ctype.h>      // toupper
 #if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
 #include <stddef.h>     // intptr_t
 #else
@@ -1160,7 +1159,7 @@ bool ImGui::ImageButtonEx2(ImGuiID id, ImTextureID texture_id, const ImVec2& siz
     const float border_size = g.Style.FrameBorderSize;
     if (border_size > 0.0f)
     {
-        window->DrawList->AddRect(bb.Min + ImVec2(1, 1), bb.Max + ImVec2(1, 1), col, g.Style.FrameRounding, 0, border_size);
+        //window->DrawList->AddRect(bb.Min + ImVec2(1, 1), bb.Max + ImVec2(1, 1), col, g.Style.FrameRounding, 0, border_size); // ORCA adds a secondary border without reason that causes wrong framesize
         window->DrawList->AddRect(bb.Min, bb.Max, col, g.Style.FrameRounding, 0, border_size);
     }
 
@@ -2134,7 +2133,7 @@ bool ImGui::BBLBeginCombo(const char *label, const char *preview_value, ImGuiCom
     bool hovered, held;
     bool pressed = ButtonBehavior(frame_bb, id, &hovered, &held);
 
-    bool push_color_count = 0;
+    int push_color_count = 0;
     if (hovered || g.ActiveId == id) {
         ImGui::PushStyleColor(ImGuiCol_Border, GetColorU32(ImGuiCol_BorderActive));
         push_color_count = 1;
@@ -2168,7 +2167,7 @@ bool ImGui::BBLBeginCombo(const char *label, const char *preview_value, ImGuiCom
         OpenPopupEx(popup_id, ImGuiPopupFlags_None);
         popup_open = true;
     }
-     if (push_color_count > 0) { ImGui::PopStyleColor(push_color_count); }
+    if (push_color_count > 0) { ImGui::PopStyleColor(push_color_count); }
     if (!popup_open) return false;
 
     if (has_window_size_constraint) {
@@ -4170,7 +4169,7 @@ bool ImGui::BBLInputScalar(const char *label, ImGuiDataType data_type, void *p_d
     // We are only allowed to access the state if we are already the active widget.
     ImGuiInputTextState *state = GetInputTextState(id);
 
-    bool push_color_count = 0;
+    int push_color_count = 0;
     if (hovered || g.ActiveId == id) {
         ImGui::PushStyleColor(ImGuiCol_Border, GetColorU32(ImGuiCol_BorderActive));
         push_color_count = 1;
@@ -6298,9 +6297,9 @@ bool ImGui::ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFl
             RenderFrameBorder(bb.Min, bb.Max, rounding);
         else
         #ifdef __APPLE__
-           window->DrawList->AddRect(bb.Min - ImVec2(3, 3), bb.Max + ImVec2(3, 3), GetColorU32(ImGuiCol_FrameBg), rounding * 2,NULL,4.0f);; // Color button are often in need of some sort of border
+            window->DrawList->AddRect(bb.Min - ImVec2(3, 3), bb.Max + ImVec2(3, 3), GetColorU32(ImGuiCol_FrameBg), rounding * 2, 0, 4.0f); // Color button are often in need of some sort of border
         #else
-            window->DrawList->AddRect(bb.Min - ImVec2(2, 2), bb.Max + ImVec2(2, 2), GetColorU32(ImGuiCol_FrameBg), rounding * 2,NULL,3.0f); // Color button are often in need of some sort of border
+            window->DrawList->AddRect(bb.Min - ImVec2(2, 2), bb.Max + ImVec2(2, 2), GetColorU32(ImGuiCol_FrameBg), rounding * 2, 0, 3.0f); // Color button are often in need of some sort of border
         #endif
     }
 

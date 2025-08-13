@@ -34,7 +34,7 @@ input
 {
 	flex: 0 0 40px;
 	height:40px;
-	border-top: 1px solid #009688;
+	border-top: 1px solid #4872E3;
 	display: flex;
 	align-items: center;
 }
@@ -60,7 +60,7 @@ input
 
 .MItem
 {
-	min-width: 220px;
+	min-width: 180px; /* ORCA Filtered items > slightly reduce min width to fit more items*/
 	height: 32px;
 }
 

@@ -328,7 +328,7 @@ void OG_CustomCtrl::OnPaint(wxPaintEvent&)
 
     wxPaintDC dc(this);
 
-    wxCoord h_pos = get_title_width() * m_em_unit;
+    wxCoord h_pos = get_title_width() * m_em_unit + 4; // ORCA Align label with group title. StaticLine.cpp uses 18px for icon 5px for spacing. Spacing doesnt scales on messureSize()
     wxCoord v_pos = 0;
     // BBS: new layout
     if (!GetLabel().IsEmpty()) {
@@ -492,13 +492,16 @@ bool OG_CustomCtrl::update_visibility(ConfigOptionMode mode)
     wxCoord    h_pos2 = get_title_width() * m_em_unit;
     wxCoord    v_pos = 0;
 
-    size_t invisible_lines = 0;
+    bool has_visible_lines = false;
     for (CtrlLine& line : ctrl_lines) {
         line.update_visibility(mode);
-        if (line.is_visible)
+        if (line.is_visible) {
             v_pos += (wxCoord)line.height;
-        else
-            invisible_lines++;
+
+            if (!line.is_separator()) { // Ignore separators
+                has_visible_lines = true;
+            }
+        }
     }
     // BBS: multi-line title
     SetFont(Label::Head_16);
@@ -513,7 +516,7 @@ bool OG_CustomCtrl::update_visibility(ConfigOptionMode mode)
 
     this->SetMinSize(wxSize(h_pos, v_pos));
 
-    return invisible_lines != ctrl_lines.size();
+    return has_visible_lines;
 }
 
 // BBS: call by Tab/Page
@@ -787,7 +790,7 @@ void OG_CustomCtrl::CtrlLine::render(wxDC& dc, wxCoord h_pos, wxCoord v_pos)
     const std::vector<Option>& option_set = og_line.get_options();
 
     wxString label = og_line.label;
-    wxColour blink_color = StateColor::darkModeColorFor("#009688");
+    wxColour blink_color = StateColor::darkModeColorFor("#4872E3");
     bool is_url_string = false;
     if (ctrl->opt_group->label_width != 0 && !label.IsEmpty()) {
         const wxColour* text_clr = field ? field->label_color() : og_line.label_color();
@@ -933,7 +936,7 @@ wxCoord OG_CustomCtrl::CtrlLine::draw_text(wxDC &dc, wxPoint pos, const wxString
 
         wxColour old_clr = dc.GetTextForeground();
         wxFont old_font = dc.GetFont();
-        wxColor clr_url = StateColor::darkModeColorFor("#009688");
+        wxColor clr_url = StateColor::darkModeColorFor("#4872E3");
         if (is_focused && is_url) {
         // temporary workaround for the OSX because of strange Bold font behavior on BigSerf
 #ifdef __APPLE__

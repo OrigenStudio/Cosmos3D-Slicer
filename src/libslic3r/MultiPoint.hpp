@@ -94,10 +94,13 @@ public:
     bool intersection(const Line& line, Point* intersection) const;
     bool first_intersection(const Line& line, Point* intersection) const;
     bool intersections(const Line &line, Points *intersections) const;
-
+    void symmetric_y(const coord_t &y_axis);
     static Points _douglas_peucker(const Points &points, const double tolerance);
     static Points visivalingam(const Points& pts, const double tolerance);
     static Points concave_hull_2d(const Points& pts, const double tolerence);
+    
+    //Orca: Distancing function used by IOI wall ordering algorithm for arachne
+    static double minimumDistanceBetweenLinesDefinedByPoints(const Points& A, const Points& B);
 
     inline auto begin()        { return points.begin(); }
     inline auto begin()  const { return points.begin(); }
@@ -105,6 +108,10 @@ public:
     inline auto end()    const { return points.end();   }
     inline auto cbegin() const { return points.begin(); }
     inline auto cend()   const { return points.end();   }
+    
+private:
+    //Orca: Distancing function used by IOI wall ordering algorithm for arachne
+    static double squaredDistanceToLineSegment(const Point& p, const Point& v, const Point& w);
 };
 
 class MultiPoint3
@@ -127,7 +134,7 @@ public:
 };
 
 extern BoundingBox get_extents(const MultiPoint &mp);
-extern BoundingBox get_extents_rotated(const std::vector<Point> &points, double angle);
+extern BoundingBox get_extents_rotated(const Points &points, double angle);
 extern BoundingBox get_extents_rotated(const MultiPoint &mp, double angle);
 
 inline double length(const Points &pts) {

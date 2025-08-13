@@ -19,7 +19,11 @@ if(Qhull_FOUND)
 message(STATUS "Using qhull from system.")
 if(SLIC3R_STATIC)
     slic3r_remap_configs("Qhull::qhullcpp;Qhull::qhullstatic_r" RelWithDebInfo Release)
-    target_link_libraries(qhull INTERFACE Qhull::qhullcpp Qhull::qhullstatic_r)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+        target_link_libraries(qhull INTERFACE Qhull::qhullcpp_d Qhull::qhullstatic_rd)
+    else()
+        target_link_libraries(qhull INTERFACE Qhull::qhullcpp Qhull::qhullstatic_r)
+    endif()
 else()
     slic3r_remap_configs("Qhull::qhullcpp;Qhull::qhull_r" RelWithDebInfo Release)
     target_link_libraries(qhull INTERFACE Qhull::qhullcpp Qhull::qhull_r)
@@ -141,7 +145,7 @@ endif(UNIX)
 ##################################################
 
 # LIBDIR is defined in the main xs CMake file:
-target_include_directories(${qhull_STATIC} BEFORE PUBLIC ${LIBDIR}/qhull/src)
+target_include_directories(${qhull_STATIC} SYSTEM BEFORE PUBLIC ${LIBDIR}/qhull/src)
 target_link_libraries(qhull INTERFACE ${qhull_STATIC})
 
 endif()
