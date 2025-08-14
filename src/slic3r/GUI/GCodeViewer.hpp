@@ -660,6 +660,7 @@ public:
             std::vector<Line> m_lines;
 
         public:
+            float m_scale = 1.0f;
             GCodeWindow() = default;
             ~GCodeWindow() { stop_mapping_file(); }
             void load_gcode(const std::string& filename, const std::vector<size_t> &lines_ends);
@@ -893,7 +894,7 @@ private:
     //void load_shells(const Print& print);
     void refresh_render_paths(bool keep_sequential_current_first, bool keep_sequential_current_last) const;
     void render_toolpaths();
-    void render_shells();
+    void render_shells(int canvas_width, int canvas_height);
 
     //BBS: GUI refactor: add canvas size
     void render_legend(float &legend_height, int canvas_width, int canvas_height, int right_margin);

@@ -22,10 +22,10 @@
     "is_custom_defined": "0",
     "name": "QIDI PETG Tough @Qidi Q1 Pro 0.4 nozzle",
     "overhang_fan_speed": [
-        "100"
+        "90"
     ],
     "pressure_advance": [
-        "0.086"
+        "0.042"
     ],
     "compatible_printers": [
     "Qidi Q1 Pro 0.4 nozzle"

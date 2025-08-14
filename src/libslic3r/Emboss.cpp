@@ -334,8 +334,8 @@ bool Emboss::divide_segments_for_close_point(ExPolygons &expolygons, double dist
                 const Points &poly_pts = poly.points;
                 const Point &line_a = poly_pts[id.point_index];
                 const Point &line_b = (!ids.is_last_point(id)) ? poly_pts[id.point_index + 1] : poly_pts.front();
-                assert(line_a == lines[index].a.cast<int>());
-                assert(line_b == lines[index].b.cast<int>());
+                assert(line_a == lines[index].a.cast<coord_t>());
+                assert(line_b == lines[index].b.cast<coord_t>());
                 if (p == line_a || p == line_b) continue;
 
                 divs.emplace_back(p, index);
@@ -1672,7 +1672,7 @@ Vec3d Emboss::suggest_up(const Vec3d normal, double up_limit)
 
 std::optional<float> Emboss::calc_up(const Transform3d &tr, double up_limit)
 {
-    auto tr_linear = tr.linear();
+    auto tr_linear = tr.linear().eval();
     // z base of transformation ( tr * UnitZ )
     Vec3d normal = tr_linear.col(2);
     // scaled matrix has base with different size

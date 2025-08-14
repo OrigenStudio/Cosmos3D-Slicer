@@ -2,7 +2,7 @@
 var m_ProfileItem;
 
 var FilamentPriority=new Array( "pla","abs","pet","tpu","pc");
-var VendorPriority=new Array("bambu lab","bambulab","bbl","kexcelled","polymaker","esun","generic");
+var VendorPriority=new Array("Orca Built-in","bambu lab","bambulab","bbl","kexcelled","polymaker","esun","Generic");
   
 function OnInit()
 {
@@ -61,6 +61,10 @@ function SortUI()
 	{
 		let OneMode=m_ProfileItem["model"][n];
 		
+		if (OneMode["vendor"] !== 'Cosmos3D') {
+			continue;
+		}
+
 		if( OneMode["nozzle_selected"]!="" )
 			ModelList.push(OneMode);
 	}
@@ -95,8 +99,8 @@ function SortUI()
 	for(let n=0;n<nMode;n++)
 	{
 		let sModel=ModelList[n];	
-
-		HtmlMode+='<div><input type="checkbox" mode="'+sModel['model']+'"  nozzle="'+sModel['nozzle_selected']+'"   onChange="MachineClick()" />'+sModel['model']+'</div>';
+		/* ORCA use label tag to allow checkbox to toggle when user ckicked to text */
+		HtmlMode+='<label><input type="checkbox" mode="'+sModel['model']+'"  nozzle="'+sModel['nozzle_selected']+'"   onChange="MachineClick()" />'+sModel['model']+'</label>';
 	}
 	
 	$('#MachineList .CValues').append(HtmlMode);	
@@ -124,7 +128,11 @@ function SortUI()
 		let fType=OneFila['type'];
 		let fSelect=OneFila['selected'];
 		let fModel=OneFila['models']
-		
+
+		if (fType !== "Concrete") {
+			continue;
+		}
+
 		//alert( fWholeName+' - '+fShortName+' - '+fVendor+' - '+fType+' - '+fSelect+' - '+fModel );
 		
 //		if(OneFila['name'].indexOf("Bambu PA-CF")>=0)
@@ -138,6 +146,7 @@ function SortUI()
 		//let bCheck=$("#MachineList input:first").prop("checked");
 		if( fModel=='')
 		{
+			// Orca: hide
 			bFind=true;
 		}
 		else
@@ -171,7 +180,8 @@ function SortUI()
 			let LowType=fType.toLowerCase();
 		    if(!TypeHtmlArray.hasOwnProperty(LowType))
 		    {
-			    let HtmlType='<div><input type="checkbox" filatype="'+fType+'" onChange="FilaClick()"   />'+fType+'</div>';
+				/* ORCA use label tag to allow checkbox to toggle when user ckicked to text */
+			    let HtmlType='<label><input type="checkbox" filatype="'+fType+'" onChange="FilaClick()"   />'+fType+'</label>';
 			
 				TypeHtmlArray[LowType]=HtmlType;
 		    }
@@ -180,7 +190,8 @@ function SortUI()
 			let lowVendor=fVendor.toLowerCase();
 			if(!VendorHtmlArray.hasOwnProperty(lowVendor))
 		    {
-			    let HtmlVendor='<div><input type="checkbox" vendor="'+fVendor+'"  onChange="VendorClick()" />'+fVendor+'</div>';
+				/* ORCA use label tag to allow checkbox to toggle when user ckicked to text */
+			    let HtmlVendor='<label><input type="checkbox" vendor="'+fVendor+'"  onChange="VendorClick()" />'+fVendor+'</label>';
 				
 				VendorHtmlArray[lowVendor]=HtmlVendor;
 		    }
@@ -189,7 +200,8 @@ function SortUI()
 			let pFila=$("#ItemBlockArea input[vendor='"+fVendor+"'][filatype='"+fType+"'][name='"+fShortName+"']");
 	        if(pFila.length==0)
 		    {
-			    let HtmlFila='<div class="MItem"><input type="checkbox" vendor="'+fVendor+'"  filatype="'+fType+'" filalist="'+fWholeName+';'+'"  model="'+fModel+'" name="'+fShortName+'" />'+fShortName+'</div>';
+				/* ORCA use label tag to allow checkbox to toggle when user ckicked to text */
+			    let HtmlFila='<label class="MItem"><input type="checkbox" vendor="'+fVendor+'"  filatype="'+fType+'" filalist="'+fWholeName+';'+'"  model="'+fModel+'" name="'+fShortName+'" />'+fShortName+'</label>';
 			
 			    $("#ItemBlockArea").append(HtmlFila);
 		    } 
@@ -198,7 +210,11 @@ function SortUI()
 				let strModel=pFila.attr("model");
 				let strFilalist=pFila.attr("filalist");
 				
-				pFila.attr("model", strModel+fModel);
+				if(strModel == '' || fModel == '')
+					pFila.attr("model", '');
+				else
+					pFila.attr("model", strModel+fModel);
+					
 				pFila.attr("filalist", strFilalist+fWholeName+';');
 			}
 			
@@ -254,12 +270,12 @@ function SortUI()
 	if(SelectNumber==0)
 		ChooseDefaultFilament();
 	
-	//--If Need Install Network Plugin
-	if(m_ProfileItem["network_plugin_install"]!='1' || (m_ProfileItem["network_plugin_install"]=='1' && m_ProfileItem["network_plugin_compability"]=='0') )
-	{
-		$("#AcceptBtn").hide();
-		$("#GotoNetPluginBtn").show();
-	}
+	// //--If Need Install Network Plugin
+	// if(m_ProfileItem["network_plugin_install"]!='1' || (m_ProfileItem["network_plugin_install"]=='1' && m_ProfileItem["network_plugin_compability"]=='0') )
+	// {
+	// 	$("#AcceptBtn").hide();
+	// 	$("#GotoNetPluginBtn").show();
+	// }
 }
 
 
@@ -469,7 +485,7 @@ function ChooseDefaultFilament()
 		let OneFF=OneNode.getElementsByTagName("input")[0];
 		$(OneFF).prop("checked",false);
 		
-	    let filamentList=OneFF.getAttribute("filalist"); 
+	    let filamentList=GetFilamentShortname(OneFF.getAttribute("filalist")); 
 		//alert(filamentList);
 		let filamentArray=filamentList.split(';')
 		
@@ -562,7 +578,7 @@ function ReturnPreviewPage()
 	let nMode=m_ProfileItem["model"].length;
 	
 	if( nMode==1)
-		document.location.href="../3/index.html";
+		document.location.href="../1/index.html";
 	else
 		document.location.href="../21/index.html";	
 }
@@ -573,7 +589,7 @@ function GotoNetPluginPage()
 	let bRet=ResponseFilamentResult();
 	
 	if(bRet)
-		window.location.href="../5/index.html";
+		window.location.href="../4orca/index.html";
 }
 
 function FinishGuide()
