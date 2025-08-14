@@ -1,0 +1,6 @@
+{
+    "type": "process",
+    "name": "fdm_process_cosmos_common",
+    "from": "system",
+    "post_process": ""
+}

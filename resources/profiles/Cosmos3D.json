@@ -1,0 +1,28 @@
+{
+    "name": "Cosmos3D Printer",
+    "version": "01.00.00.00",
+    "force_update": "0",
+    "description": "Cosmos3D printer configurations with embedded post-processing",
+    "machine_model_list": [
+        {
+            "name": "Cosmos3D v1",
+            "sub_path": "machine/Cosmos3D.json"
+        }
+    ],
+    "process_list": [
+        {
+            "name": "fdm_process_cosmos_common",
+            "sub_path": "process/fdm_process_cosmos_common.json"
+        },
+        {
+            "name": "0.20mm Standard @Cosmos3D",
+            "sub_path": "process/0.20mm Standard @Cosmos3D.json"
+        }
+    ],
+    "filament_list": [
+        {
+            "name": "Cosmos3D Generic PLA",
+            "sub_path": "filament/Cosmos3D Generic PLA.json"
+        }
+    ]
+}
