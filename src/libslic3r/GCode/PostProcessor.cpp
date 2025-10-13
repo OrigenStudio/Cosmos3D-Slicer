@@ -16,6 +16,8 @@
 // BBS
 #include <iostream>
 #include <fstream>
+#include <cmath>
+#include <limits>
 
 #ifdef WIN32
 
@@ -253,6 +255,11 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
         std::vector<std::string> cleaned_lines;
         std::string line;
         bool keep_processing = false; // Flag to start processing after "COSMOS" marker
+        
+        // Track last position for consecutive dot filtering
+        double last_x = std::numeric_limits<double>::quiet_NaN();
+        double last_y = std::numeric_limits<double>::quiet_NaN();
+        const double min_distance = 1.5; // Minimum distance in mm
 
         // Process the G-code line by line
         while (std::getline(input_file, line)) {
@@ -294,7 +301,37 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
                 
                 // Keep any line that has X or Y coordinates
                 if (cleaned_line.find('X') != std::string::npos || cleaned_line.find('Y') != std::string::npos) {
-                    cleaned_lines.push_back(cleaned_line);
+                    // Extract X and Y coordinates for distance calculation
+                    double current_x = last_x;
+                    double current_y = last_y;
+                    
+                    boost::smatch x_match, y_match;
+                    if (boost::regex_search(cleaned_line, x_match, boost::regex(R"(X([-+]?[0-9]*\.?[0-9]+))"))) {
+                        current_x = std::stod(x_match[1].str());
+                    }
+                    if (boost::regex_search(cleaned_line, y_match, boost::regex(R"(Y([-+]?[0-9]*\.?[0-9]+))"))) {
+                        current_y = std::stod(y_match[1].str());
+                    }
+                    
+                    // Check if this point is far enough from the last point
+                    bool keep_point = true;
+                    if (!std::isnan(last_x) && !std::isnan(last_y) && 
+                        !std::isnan(current_x) && !std::isnan(current_y)) {
+                        double dx = current_x - last_x;
+                        double dy = current_y - last_y;
+                        double distance = std::sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < min_distance) {
+                            keep_point = false;
+                        }
+                    }
+                    
+                    if (keep_point) {
+                        cleaned_lines.push_back(cleaned_line);
+                        // Update last position
+                        last_x = current_x;
+                        last_y = current_y;
+                    }
                     continue;
                 }
                 
