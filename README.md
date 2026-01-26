@@ -1,5 +1,11 @@
 # Cosmos3D Slicer     
-Cosmos3D is an open source slicer for FDM printers, based on OrcaSlicer.   
+Cosmos3D is an open source slicer for FDM printers, based on OrcaSlicer.
+
+> **Note:** The current logo/icon files are placeholders. Please replace the following files in `resources/images/` with your actual Cosmos3D branding:
+> - `Cosmos3D.ico` (Windows icon)
+> - `Cosmos3D.icns` (macOS icon)
+> - `Cosmos3D.png` (General purpose icon)
+> - `Cosmos3D-gcodeviewer.ico` (Windows G-code viewer icon)
 
 # Main features
 - Auto calibrations for all printers
