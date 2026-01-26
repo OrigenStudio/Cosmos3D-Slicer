@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(OrcaSlicer-native)
+project(Cosmos3D-native)
 
 add_subdirectory(build-utils)
 add_subdirectory(admesh)
@@ -114,8 +114,8 @@ endif()
 
 # Create a slic3r executable
 # Process mainfests for various platforms.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/msw/OrcaSlicer.rc.in ${CMAKE_CURRENT_BINARY_DIR}/OrcaSlicer.rc @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/msw/OrcaSlicer.manifest.in ${CMAKE_CURRENT_BINARY_DIR}/OrcaSlicer.manifest @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/msw/OrcaSlicer.rc.in ${CMAKE_CURRENT_BINARY_DIR}/Cosmos3D.rc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/msw/OrcaSlicer.manifest.in ${CMAKE_CURRENT_BINARY_DIR}/Cosmos3D.manifest @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/osx/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist @ONLY)
 if (WIN32)
     add_library(OrcaSlicer SHARED OrcaSlicer.cpp OrcaSlicer.hpp BaseException.cpp BaseException.h StackWalker.cpp StackWalker.h)
@@ -130,8 +130,8 @@ endif (MINGW)
 
 if (NOT WIN32 AND NOT APPLE)
     # Binary name on unix like systems (Linux, Unix)
-    set_target_properties(OrcaSlicer PROPERTIES OUTPUT_NAME "orca-slicer")
-    set(SLIC3R_APP_CMD "orca-slicer")
+    set_target_properties(OrcaSlicer PROPERTIES OUTPUT_NAME "cosmos3d")
+    set(SLIC3R_APP_CMD "cosmos3d")
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/unix/BuildLinuxImage.sh.in ${CMAKE_CURRENT_BINARY_DIR}/BuildLinuxImage.sh @ONLY)
 endif ()
 
@@ -177,14 +177,14 @@ if (WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
     endif()
 
-    add_executable(OrcaSlicer_app_gui WIN32 OrcaSlicer_app_msvc.cpp ${CMAKE_CURRENT_BINARY_DIR}/OrcaSlicer.rc)
+    add_executable(OrcaSlicer_app_gui WIN32 OrcaSlicer_app_msvc.cpp ${CMAKE_CURRENT_BINARY_DIR}/Cosmos3D.rc)
     # Generate debug symbols even in release mode.
     if(MSVC)
         target_link_options(OrcaSlicer_app_gui PUBLIC "$<$<CONFIG:RELEASE>:/DEBUG>")
     endif()
     target_compile_definitions(OrcaSlicer_app_gui PRIVATE -DSLIC3R_WRAPPER_NOCONSOLE)
     add_dependencies(OrcaSlicer_app_gui OrcaSlicer)
-    set_target_properties(OrcaSlicer_app_gui PROPERTIES OUTPUT_NAME "orca-slicer")
+    set_target_properties(OrcaSlicer_app_gui PROPERTIES OUTPUT_NAME "cosmos3d")
     target_link_libraries(OrcaSlicer_app_gui PRIVATE boost_headeronly)
 endif ()
 
@@ -232,7 +232,7 @@ else ()
     if (APPLE AND NOT CMAKE_MACOSX_BUNDLE)
         # On OSX, the name of the binary matches the name of the Application.
         add_custom_command(TARGET OrcaSlicer POST_BUILD
-            COMMAND ln -sf OrcaSlicer orca-slicer
+            COMMAND ln -sf OrcaSlicer cosmos3d
             WORKING_DIRECTORY "$<TARGET_FILE_DIR:OrcaSlicer>"
             VERBATIM)
     else ()
@@ -249,14 +249,14 @@ else ()
     endif ()
     if (CMAKE_MACOSX_BUNDLE)
         if (CMAKE_CONFIGURATION_TYPES)
-            set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/OrcaSlicer.app/Contents/Resources")
+            set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/Cosmos3D.app/Contents/Resources")
         else()
-            set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/OrcaSlicer.app/Contents/Resources")
+            set(BIN_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/Cosmos3D.app/Contents/Resources")
         endif()
         set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
-        set(MACOSX_BUNDLE_BUNDLE_NAME "OrcaSlicer")
+        set(MACOSX_BUNDLE_BUNDLE_NAME "Cosmos3D")
         set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${SoftFever_VERSION})
-        set(MACOSX_BUNDLE_COPYRIGHT "Copyright(C) 2022-2024 Li Jiang All Rights Reserved")
+        set(MACOSX_BUNDLE_COPYRIGHT "Copyright(C) 2022-2024 OrigenStudio All Rights Reserved")
     endif()
     add_custom_command(TARGET OrcaSlicer POST_BUILD
         COMMAND ln -sfn "${SLIC3R_RESOURCES_DIR}" "${BIN_RESOURCES_DIR}"
