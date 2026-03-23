@@ -3676,7 +3676,7 @@ bool SelectMachineDialog::is_show_timelapse()
                 }
                 break;
             }
-            if (line == "OrcaSlicer")
+            if (line == "Cosmos3D")
                 is_version = true;
         }
     }
