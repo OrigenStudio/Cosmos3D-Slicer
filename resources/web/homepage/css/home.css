@@ -95,10 +95,11 @@ body
 	height:36px;
 	line-height: 36px;
 	display: flex;
-	justify-content: center;
+	flex-direction: column;		/*ORCA*/
+	align-items: center;		/*Allow icon centered vertically*/
+	justify-content: center;	/*and use login button in new line*/
 	user-select: none;
 }
-
 #LoginBtn
 {
 	cursor:pointer;
@@ -138,7 +139,7 @@ body
 
 #BBLIcon
 {
-	height:36px;
+	height:96px; /*ORCA use bigger icon to fit logo size*/
 }
 
 #Login2
@@ -169,8 +170,8 @@ body
 	font-size: 14px;
 	height: 24px;
 	line-height: 24px;
-	color: #4db6ac;
-	border: 1px solid  #009688;
+	color: #0085E8;
+	border: 1px solid  #4872E3;
 	border-radius: 4px;
 	cursor: pointer;
 	margin-top: 5px;
@@ -203,12 +204,12 @@ body
 
 .BtnItem:hover
 {
-	background-color: #BFE1DE; /*ORCA color with %25 opacity*/
+	background-color: #CCDAFF; /*ORCA color with %25 opacity*/
 }
 
 .BtnItemSelected
 {
-	background-color: #BFE1DE; /*ORCA color with %25 opacity*/
+	background-color: #CCDAFF; /*ORCA color with %25 opacity*/
 }
 
 .BtnIcon
@@ -277,8 +278,8 @@ body
 
 .MenuItem:hover
 {
-	border-color: #009688;		/*ORCA color*/
-	background-color: #E5F0EE; /*ORCA color with %25 opacity*/
+	border-color: #4872E3;		/*ORCA color*/
+	background-color: #E3F9FF; /*ORCA color with %25 opacity*/
 }
 
 .MenuIcon
@@ -465,7 +466,7 @@ body
 .CT_Item:hover
 {
 	cursor: pointer;
-	background-color:#009688; /*ORCA color*/
+	background-color:#4872E3; /*ORCA color*/
 	border-radius: 4px;
 	color: #fff;
 }
@@ -701,7 +702,7 @@ body
 #HotModel_RIGHT_Title:hover
 {
 	cursor: pointer;	
-	color:#009688;	
+	color:#4872E3;	
 }
 
 .HotModelPiece

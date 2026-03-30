@@ -8,13 +8,16 @@
 #include <boost/log/trivial.hpp>
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/convert.hpp>
-#include <boost/nowide/cenv.hpp>
 #include <boost/nowide/fstream.hpp>
+#include <boost/regex.hpp>
 
 // BBS
 #include <iostream>
 #include <fstream>
+#include <cmath>
+#include <limits>
 
 #ifdef WIN32
 
@@ -225,6 +228,120 @@ void gcode_add_line_number(const std::string& path, const DynamicPrintConfig& co
     fs.close();
 }
 
+// Cosmos3D embedded post-processing script
+bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrintConfig &config)
+{
+    // Check if this is a Cosmos3D printer
+    const auto *printer_model = config.opt<ConfigOptionString>("printer_model");
+    if (!printer_model || printer_model->value.find("Cosmos") == std::string::npos)
+        return false;
+
+    BOOST_LOG_TRIVIAL(info) << "Running Cosmos3D embedded post-processing on file " << gcode_path;
+
+    auto gcode_file = boost::filesystem::path(gcode_path);
+    if (!boost::filesystem::exists(gcode_file)) {
+        BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: G-code file does not exist: " << gcode_path;
+        return false;
+    }
+
+    try {
+        // Read the entire G-code file
+        std::ifstream input_file(gcode_path);
+        if (!input_file.is_open()) {
+            BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: Cannot open G-code file for reading: " << gcode_path;
+            return false;
+        }
+
+        std::vector<std::string> cleaned_lines;
+        std::string line;
+        bool keep_processing = false; // Flag to start processing after "COSMOS" marker
+
+        // Process the G-code line by line
+        while (std::getline(input_file, line)) {
+            // Trim whitespace
+            boost::trim(line);
+
+            // Start processing only after the "COSMOS" marker
+            if (line.find("COSMOS") != std::string::npos) {
+                keep_processing = true;
+                continue;
+            }
+
+            if (!keep_processing) {
+                continue;
+            }
+
+            // Keep layer change markers but modify them
+            if (line == ";LAYER_CHANGE") {
+                cleaned_lines.push_back(";LAYER_CHANGE M3");
+                continue;
+            }
+
+            // Skip other comment lines (starting with semicolon)
+            if (!line.empty() && line[0] == ';') {
+                continue;
+            }
+
+            // Skip progress update commands (M73)
+            if (line.find("M73") != std::string::npos) {
+                continue;
+            }
+
+            // Process G1 movement commands
+            if (line.find("G1") == 0) {
+                // Remove extruder (E) values but keep the rest of the line
+                std::string cleaned_line = line;
+                // Use regex to remove E values
+                cleaned_line = boost::regex_replace(cleaned_line, boost::regex(R"(\sE[-+]?[0-9]*\.?[0-9]+)"), "");
+
+                // Keep any line that has X or Y coordinates
+                if (cleaned_line.find('X') != std::string::npos || cleaned_line.find('Y') != std::string::npos) {
+                    cleaned_lines.push_back(cleaned_line);
+                    continue;
+                }
+
+                // Skip lines that only have Z movement (with optional F parameter)
+                if (boost::regex_match(cleaned_line, boost::regex(R"(G1\s+Z[-+]?[0-9]*\.?[0-9]+(?:\s+F[-+]?[0-9]*\.?[0-9]+)?)"))) {
+                    continue;
+                }
+
+                // Skip lines that only have feed rate (F parameter)
+                if (boost::regex_match(cleaned_line, boost::regex(R"(G1\s+F[-+]?[0-9]*\.?[0-9]+)"))) {
+                    continue;
+                }
+
+                // Add other G1 commands
+                cleaned_lines.push_back(cleaned_line);
+                continue;
+            }
+
+            // Add all other non-comment, non-M73 lines
+            cleaned_lines.push_back(line);
+        }
+
+        input_file.close();
+
+        // Write the cleaned G-code back to the file
+        std::ofstream output_file(gcode_path);
+        if (!output_file.is_open()) {
+            BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: Cannot open G-code file for writing: " << gcode_path;
+            return false;
+        }
+
+        for (const auto& cleaned_line : cleaned_lines) {
+            output_file << cleaned_line << "\n";
+        }
+        output_file.close();
+
+        BOOST_LOG_TRIVIAL(info) << "Cosmos3D post-processing completed successfully";
+        return true;
+
+    } catch (const std::exception &ex) {
+        BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing failed: " << ex.what();
+        return false;
+    }
+}
+
 // Run post processing script / scripts if defined.
 // Returns true if a post-processing script was executed.
 // Returns false if no post-processing script was defined.
@@ -238,10 +355,14 @@ void gcode_add_line_number(const std::string& path, const DynamicPrintConfig& co
 bool run_post_process_scripts(std::string &src_path, bool make_copy, const std::string &host, std::string &output_name, const DynamicPrintConfig &config)
 {
     const auto *post_process = config.opt<ConfigOptionStrings>("post_process");
-    if (// likely running in SLA mode
-        post_process == nullptr || 
-        // no post-processing script
-        post_process->values.empty())
+    bool has_regular_scripts = (post_process != nullptr && !post_process->values.empty());
+
+    // Check if we need to run Cosmos3D processing
+    const auto *printer_model = config.opt<ConfigOptionString>("printer_model");
+    bool is_cosmos_printer = (printer_model && printer_model->value.find("Cosmos") != std::string::npos);
+
+    // If no regular scripts and not a cosmos printer, nothing to do
+    if (!has_regular_scripts && !is_cosmos_printer)
         return false;
 
     std::string path;
@@ -300,36 +421,47 @@ bool run_post_process_scripts(std::string &src_path, bool make_copy, const std::
     // Remove possible stalled path_output_name of the previous run.
     remove_output_name_file();
 
+    // Run Cosmos3D embedded post-processing if applicable
     try {
-        for (const std::string &scripts : post_process->values) {
-    		std::vector<std::string> lines;
-    		boost::split(lines, scripts, boost::is_any_of("\r\n"));
-            for (std::string script : lines) {
-                // Ignore empty post processing script lines.
-                boost::trim(script);
-                if (script.empty())
-                    continue;
-                BOOST_LOG_TRIVIAL(info) << "Executing script " << script << " on file " << path;
-                std::string std_err;
-                const int result = run_script(script, gcode_file.string(), std_err);
-                if (result != 0) {
-                    const std::string msg = std_err.empty() ? (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%") % script % path % result).str()
-                        : (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%\nOutput:\n%4%") % script % path % result % std_err).str();
-                    BOOST_LOG_TRIVIAL(error) << msg;
-                    delete_copy();
-                    throw Slic3r::RuntimeError(msg);
-                }
-                if (! boost::filesystem::exists(gcode_file)) {
-                    const std::string msg = (boost::format(_(L(
-                        "Post-processing script %1% failed.\n\n"
-                        "The post-processing script is expected to change the G-code file %2% in place, but the G-code file was deleted and likely saved under a new name.\n"
-                        "Please adjust the post-processing script to change the G-code in place and consult the manual on how to optionally rename the post-processed G-code file.\n")))
-                        % script % path).str();
-                    BOOST_LOG_TRIVIAL(error) << msg;
-                    throw Slic3r::RuntimeError(msg);
+        run_cosmos_post_processing(path, config);
+    } catch (const std::exception &ex) {
+        BOOST_LOG_TRIVIAL(warning) << "Cosmos3D post-processing failed: " << ex.what();
+        // Continue with regular post-processing even if cosmos processing fails
+    }
+
+    try {
+        // Run regular post-processing scripts if any are defined
+        if (has_regular_scripts) {
+            for (const std::string &scripts : post_process->values) {
+        		std::vector<std::string> lines;
+        		boost::split(lines, scripts, boost::is_any_of("\r\n"));
+                for (std::string script : lines) {
+                    // Ignore empty post processing script lines.
+                    boost::trim(script);
+                    if (script.empty())
+                        continue;
+                    BOOST_LOG_TRIVIAL(info) << "Executing script " << script << " on file " << path;
+                    std::string std_err;
+                    const int result = run_script(script, gcode_file.string(), std_err);
+                    if (result != 0) {
+                        const std::string msg = std_err.empty() ? (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%") % script % path % result).str()
+                            : (boost::format("Post-processing script %1% on file %2% failed.\nError code: %3%\nOutput:\n%4%") % script % path % result % std_err).str();
+                        BOOST_LOG_TRIVIAL(error) << msg;
+                        delete_copy();
+                        throw Slic3r::RuntimeError(msg);
+                    }
+                    if (! boost::filesystem::exists(gcode_file)) {
+                        const std::string msg = (boost::format(_(L(
+                            "Post-processing script %1% failed.\n\n"
+                            "The post-processing script is expected to change the G-code file %2% in place, but the G-code file was deleted and likely saved under a new name.\n"
+                            "Please adjust the post-processing script to change the G-code in place and consult the manual on how to optionally rename the post-processed G-code file.\n")))
+                            % script % path).str();
+                        BOOST_LOG_TRIVIAL(error) << msg;
+                        throw Slic3r::RuntimeError(msg);
+                    }
                 }
             }
-        }
+        }  // End of if (has_regular_scripts)
         if (boost::filesystem::exists(path_output_name)) {
             try {
                 // Read a single line from path_output_name, which should contain the new output name of the post-processed G-code.

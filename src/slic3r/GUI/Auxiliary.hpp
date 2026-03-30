@@ -51,8 +51,8 @@
 #define AUFILE_GREY500 wxColour(158, 158, 158)
 #define AUFILE_GREY300 wxColour(238, 238, 238)
 #define AUFILE_GREY200 wxColour(248, 248, 248)
-#define AUFILE_BRAND wxColour(0, 150, 136)
-#define AUFILE_BRAND_TRANSPARENT wxColour("#E5F0EE") // ORCA color with %10 opacity
+#define AUFILE_BRAND wxColour(72, 114, 227)
+#define AUFILE_BRAND_TRANSPARENT wxColour("#E3F9FF") // ORCA color with %10 opacity
 //#define AUFILE_PICTURES_SIZE wxSize(FromDIP(300), FromDIP(300))
 //#define AUFILE_PICTURES_PANEL_SIZE wxSize(FromDIP(300), FromDIP(340))
 #define AUFILE_PICTURES_SIZE wxSize(FromDIP(168), FromDIP(168))
@@ -180,12 +180,14 @@ public:
     ~DesignerPanel();
 
     ::TextInput*        m_input_designer {nullptr};
-    ::TextInput*        m_imput_model_name {nullptr};
+    ::TextInput*        m_input_model_name {nullptr};
+    wxTextCtrl*         m_input_description {nullptr};
     ComboBox*           m_combo_license {nullptr};
     bool Show(bool show) override;
     void                init_license_list();
     void                on_input_enter_designer(wxCommandEvent &evt);
     void                on_input_enter_model(wxCommandEvent &evt);
+    void                on_input_enter_description(wxCommandEvent &evt);
     void                on_select_license(wxCommandEvent& evt);
     void                update_info();
     void                msw_rescale();

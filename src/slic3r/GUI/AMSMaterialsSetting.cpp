@@ -43,10 +43,10 @@ void AMSMaterialsSetting::create()
     m_sizer_button->Add(0, 0, 1, wxEXPAND, 0);
 
     m_button_confirm = new Button(this, _L("Confirm"));
-    m_btn_bg_green   = StateColor(std::pair<wxColour, int>(wxColour(0, 137, 123), StateColor::Pressed), std::pair<wxColour, int>(wxColour(38, 166, 154), StateColor::Hovered),
-                            std::pair<wxColour, int>(wxColour(0, 150, 136), StateColor::Normal));
+    m_btn_bg_green   = StateColor(std::pair<wxColour, int>(wxColour(46, 103, 255), StateColor::Pressed), std::pair<wxColour, int>(wxColour(0, 133, 232), StateColor::Hovered),
+                            std::pair<wxColour, int>(wxColour(72, 114, 227), StateColor::Normal));
     m_button_confirm->SetBackgroundColor(m_btn_bg_green);
-    m_button_confirm->SetBorderColor(wxColour(0, 150, 136));
+    m_button_confirm->SetBorderColor(wxColour(72, 114, 227));
     m_button_confirm->SetTextColor(wxColour("#FFFFFE"));
     m_button_confirm->SetMinSize(AMS_MATERIALS_SETTING_BUTTON_SIZE);
     m_button_confirm->SetCornerRadius(FromDIP(12));
@@ -147,7 +147,7 @@ void AMSMaterialsSetting::create_panel_normal(wxWindow* parent)
     m_sizer_filament->Add(m_comboBox_filament, 1, wxALIGN_CENTER, 0);
 
     m_readonly_filament = new TextInput(parent, wxEmptyString, "", "", wxDefaultPosition, AMS_MATERIALS_SETTING_COMBOX_WIDTH, wxTE_READONLY | wxRIGHT);
-    m_readonly_filament->SetBorderColor(StateColor(std::make_pair(0xDBDBDB, (int)StateColor::Focused), std::make_pair(0x009688, (int)StateColor::Hovered),
+    m_readonly_filament->SetBorderColor(StateColor(std::make_pair(0xDBDBDB, (int)StateColor::Focused), std::make_pair(0x4872E3, (int)StateColor::Hovered),
         std::make_pair(0xDBDBDB, (int)StateColor::Normal)));
     m_readonly_filament->SetFont(::Label::Body_14);
     m_readonly_filament->SetLabelColor(AMS_MATERIALS_SETTING_GREY800);
@@ -158,7 +158,7 @@ void AMSMaterialsSetting::create_panel_normal(wxWindow* parent)
 
     wxBoxSizer* m_sizer_colour = new wxBoxSizer(wxHORIZONTAL);
 
-    m_title_colour = new wxStaticText(parent, wxID_ANY, _L("Colour"), wxDefaultPosition, wxSize(AMS_MATERIALS_SETTING_LABEL_WIDTH, -1), 0);
+    m_title_colour = new wxStaticText(parent, wxID_ANY, _L("Color"), wxDefaultPosition, wxSize(AMS_MATERIALS_SETTING_LABEL_WIDTH, -1), 0);
     m_title_colour->SetFont(::Label::Body_13);
     m_title_colour->SetForegroundColour(AMS_MATERIALS_SETTING_GREY800);
     m_title_colour->Wrap(-1);
@@ -258,7 +258,7 @@ void AMSMaterialsSetting::create_panel_normal(wxWindow* parent)
     m_panel_SN->Fit();
 
     wxBoxSizer* m_tip_sizer = new wxBoxSizer(wxHORIZONTAL);
-    m_tip_readonly = new Label(parent, _L("Setting AMS slot information while printing is not supported"));
+    m_tip_readonly          = new Label(parent, L"");
     m_tip_readonly->SetForegroundColour(*wxBLACK);
     m_tip_readonly->SetBackgroundColour(*wxWHITE);
     m_tip_readonly->SetMinSize(wxSize(FromDIP(380), -1));
@@ -357,7 +357,7 @@ void AMSMaterialsSetting::paintEvent(wxPaintEvent &evt)
 {
     auto      size = GetSize();
     wxPaintDC dc(this);
-    dc.SetPen(wxPen(StateColor::darkModeColorFor(wxColour("#000000")), 1, wxSOLID));
+    dc.SetPen(wxPen(StateColor::darkModeColorFor(wxColour("#000000")), 1, wxPENSTYLE_SOLID));
     dc.SetBrush(wxBrush(*wxTRANSPARENT_BRUSH));
     dc.DrawRectangle(0, 0, size.x, size.y);
 }
@@ -413,20 +413,27 @@ void AMSMaterialsSetting::update()
 
 void AMSMaterialsSetting::enable_confirm_button(bool en)
 {
-    m_button_confirm->Show(en);
+    m_tip_readonly->SetLabelText(wxEmptyString);
+
+    if (!en) {
+        m_button_confirm->Show(obj->is_support_filament_setting_inprinting);
+    }
+    else {
+        m_button_confirm->Show(en);
+    }
+
     if (!m_is_third) {
         m_tip_readonly->Hide(); 
     }
     else {
-        //m_comboBox_filament->Show(en);
-        //m_readonly_filament->Show(!en);
+        if (!obj->is_support_filament_setting_inprinting) {
+            if (!is_virtual_tray()) {
+                m_tip_readonly->SetLabelText(_L("Setting AMS slot information while printing is not supported"));
+            } else {
+                m_tip_readonly->SetLabelText(_L("Setting Virtual slot information while printing is not supported"));
+            }
+        }
 
-        if ( !is_virtual_tray() ) {
-            m_tip_readonly->SetLabelText(_L("Setting AMS slot information while printing is not supported"));
-        }
-        else {
-            m_tip_readonly->SetLabelText(_L("Setting Virtual slot information while printing is not supported"));
-        }
         m_tip_readonly->Wrap(FromDIP(380));
         m_tip_readonly->Show(!en);
     }
@@ -705,9 +712,14 @@ void AMSMaterialsSetting::on_picker_color(wxCommandEvent& event)
 
 void AMSMaterialsSetting::on_clr_picker(wxMouseEvent &event) 
 {
-    if(!m_is_third || obj->is_in_printing() || obj->can_resume())
+    if(!m_is_third)
         return;
 
+    if (obj->is_in_printing() || obj->can_resume()) {
+        if (!obj->is_support_filament_setting_inprinting) {
+            return;
+        }
+    }
 
     std::vector<wxColour> ams_colors;
     for (auto ams_it = obj->amsList.begin(); ams_it != obj->amsList.end(); ++ams_it) {
@@ -922,8 +934,8 @@ void AMSMaterialsSetting::Popup(wxString filament, wxString sn, wxString temp_mi
         }
 
         m_button_reset->Show();
-        m_button_confirm->Show(); 
-    } 
+        //m_button_confirm->Show(); 
+    }
 
     m_comboBox_filament->Set(filament_items);
     m_comboBox_filament->SetSelection(selection_idx);
@@ -980,10 +992,11 @@ void AMSMaterialsSetting::on_select_filament(wxCommandEvent &evt)
                 auto filament_item = map_filament_items[m_comboBox_filament->GetValue().ToStdString()];
                 std::string filament_id   = filament_item.filament_id;
                 if (it->filament_id.compare(filament_id) == 0) {
+                    ConfigOption *       printer_opt  = it->config.option("compatible_printers");
+                    ConfigOptionStrings *printer_strs = dynamic_cast<ConfigOptionStrings *>(printer_opt);
                     bool has_compatible_printer = false;
-                    std::string preset_name            = it->name;
-                    for (std::string printer_name : printer_names) {
-                        if (preset_name.find(printer_name) != std::string::npos) {
+                    for (auto printer_str : printer_strs->values) {
+                        if (printer_names.find(printer_str) != printer_names.end()) {
                             has_compatible_printer = true;
                             break;
                         }
@@ -1051,7 +1064,7 @@ void AMSMaterialsSetting::on_select_filament(wxCommandEvent &evt)
     }
     else {
         m_button_confirm->SetBackgroundColor(m_btn_bg_green);
-        m_button_confirm->SetBorderColor(wxColour(0, 150, 136));
+        m_button_confirm->SetBorderColor(wxColour(72, 114, 227));
         m_button_confirm->SetTextColor(wxColour("#FFFFFE"));
         m_button_confirm->Enable(true);
     }

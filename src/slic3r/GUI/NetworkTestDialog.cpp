@@ -56,7 +56,7 @@ NetworkTestDialog::NetworkTestDialog(wxWindow* parent, wxWindowID id, const wxSt
 
 wxBoxSizer* NetworkTestDialog::create_top_sizer(wxWindow* parent)
 {
-    StateColor btn_bg(std::pair<wxColour, int>(wxColour(0, 137, 123), StateColor::Pressed), std::pair<wxColour, int>(wxColour(38, 166, 154), StateColor::Hovered), std::pair<wxColour, int>(wxColour(255, 255, 255), StateColor::Enabled));
+    StateColor btn_bg(std::pair<wxColour, int>(wxColour(46, 103, 255), StateColor::Pressed), std::pair<wxColour, int>(wxColour(0, 133, 232), StateColor::Hovered), std::pair<wxColour, int>(wxColour(255, 255, 255), StateColor::Enabled));
 	auto sizer = new wxBoxSizer(wxVERTICAL);
 
 	auto line_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -93,7 +93,7 @@ wxBoxSizer* NetworkTestDialog::create_info_sizer(wxWindow* parent)
 	sizer->Add(text_basic_info, 0, wxALL, 5);
 
 	wxBoxSizer* version_sizer = new wxBoxSizer(wxHORIZONTAL);
-	text_version_title = new wxStaticText(this, wxID_ANY, _L("OrcaSlicer Version:"), wxDefaultPosition, wxDefaultSize, 0);
+	text_version_title = new wxStaticText(this, wxID_ANY, _L("Cosmos3D Version:"), wxDefaultPosition, wxDefaultSize, 0);
 	text_version_title->Wrap(-1);
 	version_sizer->Add(text_version_title, 0, wxALL, 5);
 
@@ -138,12 +138,12 @@ wxBoxSizer* NetworkTestDialog::create_content_sizer(wxWindow* parent)
 	grid_sizer->SetFlexibleDirection(wxBOTH);
 	grid_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-    StateColor btn_bg(std::pair<wxColour, int>(wxColour(0, 137, 123), StateColor::Pressed),std::pair<wxColour, int>(wxColour(38, 166, 154), StateColor::Hovered), std::pair<wxColour, int>(wxColour(255,255,255), StateColor::Enabled));
-	btn_link = new Button(this, _L("Test OrcaSlicer(GitHub)"));
+    StateColor btn_bg(std::pair<wxColour, int>(wxColour(46, 103, 255), StateColor::Pressed),std::pair<wxColour, int>(wxColour(0, 133, 232), StateColor::Hovered), std::pair<wxColour, int>(wxColour(255,255,255), StateColor::Enabled));
+	btn_link = new Button(this, _L("Test Cosmos3D (GitHub)"));
     btn_link->SetBackgroundColor(btn_bg);
 	grid_sizer->Add(btn_link, 0, wxEXPAND | wxALL, 5);
 
-	text_link_title = new wxStaticText(this, wxID_ANY, _L("Test OrcaSlicer(GitHub):"), wxDefaultPosition, wxDefaultSize, 0);
+	text_link_title = new wxStaticText(this, wxID_ANY, _L("Test Cosmos3D (GitHub):"), wxDefaultPosition, wxDefaultSize, 0);
 	text_link_title->Wrap(-1);
 	grid_sizer->Add(text_link_title, 0, wxALIGN_RIGHT | wxALL, 5);
 
@@ -151,7 +151,7 @@ wxBoxSizer* NetworkTestDialog::create_content_sizer(wxWindow* parent)
 	text_link_val->Wrap(-1);
 	grid_sizer->Add(text_link_val, 0, wxALL, 5);
 
-	btn_bing = new Button(this, _L("Test Bing.com"));
+	btn_bing = new Button(this, _L("Test bing.com"));
     btn_bing->SetBackgroundColor(btn_bg);
 	grid_sizer->Add(btn_bing, 0, wxEXPAND | wxALL, 5);
 

@@ -907,13 +907,15 @@ AmsHumidityTipPopup::AmsHumidityTipPopup(wxWindow* parent)
 
     close_img = ScalableBitmap(this, "hum_popup_close", 24);
 
-    m_staticText = new Label(this, _L("Current Cabin humidity"));
+    m_staticText = new Label(this, _L("Current AMS humidity"));
     m_staticText->SetFont(::Label::Head_24);
 
     humidity_level_list = new AmsHumidityLevelList(this);
     curr_humidity_img = new wxStaticBitmap(this, wxID_ANY, create_scaled_bitmap("hum_level1_light", this, 132), wxDefaultPosition, wxSize(FromDIP(132), FromDIP(132)), 0);
 
-    m_staticText_note = new Label(this, _L("Please change the desiccant when it is too wet. The indicator may not represent accurately in following cases : when the lid is open or the desiccant pack is changed. it take hours to absorb the moisture, low temperatures also slow down the process."));
+    m_staticText_note = new Label(this, _L("Please change the desiccant when it is too wet. "
+                                           "The indicator may not represent accurately in following cases: when the lid is open or the desiccant pack is changed. "
+                                           "It take hours to absorb the moisture, and low temperatures also slow down the process."));
     m_staticText_note->SetMinSize(wxSize(FromDIP(680), -1));
     m_staticText_note->SetMaxSize(wxSize(FromDIP(680), -1));
     m_staticText_note->Wrap(FromDIP(680));
@@ -1022,7 +1024,7 @@ AmsTutorialPopup::AmsTutorialPopup(wxWindow* parent)
     wxBoxSizer* sizer_main;
     sizer_main = new wxBoxSizer(wxVERTICAL);
 
-    text_title = new Label(this, Label::Head_14, _L("Config which AMS slot should be used for a filament used in the print job"));
+    text_title = new Label(this, Label::Head_14, _L("Configure which AMS slot should be used for a filament used in the print job."));
     text_title->SetSize(wxSize(FromDIP(350), -1));
     text_title->Wrap(FromDIP(350));
     sizer_main->Add(text_title, 0, wxALIGN_CENTER | wxTOP, 18);
@@ -1169,7 +1171,7 @@ void AmsIntroducePopup::set_mode(bool enable_ams)
 {
     if (enable_ams) {
         m_staticText_top->SetLabelText(_L("Enable AMS"));
-        m_staticText_bottom->SetLabelText(_L("Print with filaments in ams"));
+        m_staticText_bottom->SetLabelText(_L("Print with filaments in AMS"));
         m_img_enable_ams->Show();
         m_img_disable_ams->Hide();
     }
@@ -1271,10 +1273,6 @@ void AmsReplaceMaterialDialog::create()
     SetMinSize(wxSize(FromDIP(445), -1));
     SetMaxSize(wxSize(FromDIP(445), -1));
 
-    // set icon for dialog
-    std::string icon_path = (boost::format("%1%/images/OrcaSlicerTitle.ico") % resources_dir()).str();
-    SetIcon(wxIcon(encode_path(icon_path.c_str()), wxBITMAP_TYPE_ICO));
-
     m_main_sizer = new wxBoxSizer(wxVERTICAL);
     auto m_top_line = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxTAB_TRAVERSAL);
     m_top_line->SetBackgroundColour(wxColour(166, 169, 170));
@@ -1283,7 +1281,7 @@ void AmsReplaceMaterialDialog::create()
 
     auto label_title = new Label(this, _L("Auto Refill"));
     label_title->SetFont(Label::Head_14);
-    label_title->SetForegroundColour(0x009688);
+    label_title->SetForegroundColour(0x4872E3);
     label_txt = new Label(this, _L("When the current material run out, the printer will continue to print in the following order."));
     label_txt->SetFont(Label::Body_13);
     label_txt->SetForegroundColour(StateColor::darkModeColorFor(wxColour("#323A3C")));
@@ -1318,7 +1316,7 @@ void AmsReplaceMaterialDialog::create()
         std::pair<wxColour, int>(wxColour(38, 46, 48), StateColor::Enabled));
 
 
-    StateColor btn_bg_green(std::pair<wxColour, int>(wxColour(0, 137, 123), StateColor::Pressed), std::pair<wxColour, int>(wxColour(0, 150, 136), StateColor::Normal));
+    StateColor btn_bg_green(std::pair<wxColour, int>(wxColour(46, 103, 255), StateColor::Pressed), std::pair<wxColour, int>(wxColour(72, 114, 227), StateColor::Normal));
     m_button_sizer->Add( 0, 0, 1, wxEXPAND, 0 );
 
     m_main_sizer->Add(0,0,0, wxTOP, FromDIP(12));
@@ -1432,7 +1430,8 @@ void AmsReplaceMaterialDialog::update_machine_obj(MachineObject* obj)
             label_txt->SetLabelText(_L("AMS filament backup is not enabled, please enable it in the AMS settings."));
         }
         else {
-            label_txt->SetLabelText(_L("If there are two identical filaments in AMS, AMS filament backup will be enabled. \n(Currently supporting automatic supply of consumables with the same brand, material type, and color)"));
+            label_txt->SetLabelText(_L("If there are two identical filaments in AMS, AMS filament backup will be enabled.\n"
+                                       "(Currently supporting automatic supply of consumables with the same brand, material type, and color)"));
         } 
 
         label_txt->SetMinSize(wxSize(FromDIP(380), -1));

@@ -670,7 +670,7 @@ PlaterPresetComboBox::PlaterPresetComboBox(wxWindow *parent, Preset::Type preset
     if (m_type == Preset::TYPE_FILAMENT) {
         int em = wxGetApp().em_unit();
         clr_picker = new wxBitmapButton(parent, wxID_ANY, {}, wxDefaultPosition, wxSize(FromDIP(20), FromDIP(20)), wxBU_EXACTFIT | wxBU_AUTODRAW | wxBORDER_NONE);
-        clr_picker->SetToolTip(_L("Click to pick filament color"));
+        clr_picker->SetToolTip(_L("Click to select filament color"));
         clr_picker->Bind(wxEVT_BUTTON, [this](wxCommandEvent& e) {
             m_clrData.SetColour(clr_picker->GetBackgroundColour());
             m_clrData.SetChooseFull(true);
@@ -681,7 +681,7 @@ PlaterPresetComboBox::PlaterPresetComboBox(wxWindow *parent, Preset::Type preset
                  m_clrData.SetCustomColour(i, string_to_wxColor(colors[i]));
             }
             wxColourDialog dialog(this, &m_clrData);
-            dialog.SetTitle(_L("Please choose the filament colour"));
+            dialog.SetTitle(_L("Please choose the filament color"));
             if ( dialog.ShowModal() == wxID_OK )
             {
                 m_clrData = dialog.GetColourData();
@@ -717,25 +717,25 @@ PlaterPresetComboBox::PlaterPresetComboBox(wxWindow *parent, Preset::Type preset
         });
     }
     else {
-        edit_btn = new ScalableButton(parent, wxID_ANY, "cog");
-        edit_btn->SetToolTip(_L("Click to edit preset"));
+//         edit_btn = new ScalableButton(parent, wxID_ANY, "cog");
+//         edit_btn->SetToolTip(_L("Click to edit preset"));
 
-        edit_btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent)
-            {
-                // In a case of a physical printer, for its editing open PhysicalPrinterDialog
-                if (m_type == Preset::TYPE_PRINTER
-#ifdef __linux__
-                    // To edit extruder color from the sidebar
-                    || m_type == Preset::TYPE_FILAMENT
-#endif //__linux__
-                    )
-                    show_edit_menu();
-                else
-                    switch_to_tab();
-            });
-#ifdef __linux__
-        edit_btn->Hide();
-#endif //__linux__
+//         edit_btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent)
+//             {
+//                 // In a case of a physical printer, for its editing open PhysicalPrinterDialog
+//                 if (m_type == Preset::TYPE_PRINTER
+// #ifdef __linux__
+//                     // To edit extruder color from the sidebar
+//                     || m_type == Preset::TYPE_FILAMENT
+// #endif //__linux__
+//                     )
+//                     show_edit_menu();
+//                 else
+//                     switch_to_tab();
+//             });
+// #ifdef __linux__
+//         edit_btn->Hide();
+// #endif //__linux__
     }
 }
 
@@ -796,13 +796,6 @@ bool PlaterPresetComboBox::switch_to_tab()
     if (!tab)
         return false;
 
-    //BBS  Select NoteBook Tab params
-    if (tab->GetParent() == wxGetApp().params_panel())
-        wxGetApp().mainframe->select_tab(MainFrame::tp3DEditor);
-    else
-        wxGetApp().params_dialog()->Popup();
-    tab->restore_last_select_item();
-
     const Preset* selected_filament_preset = nullptr;
     if (m_type == Preset::TYPE_FILAMENT)
     {
@@ -813,7 +806,6 @@ bool PlaterPresetComboBox::switch_to_tab()
             if (wxGetApp().get_tab(m_type)->select_preset(preset_name))
                 wxGetApp().get_tab(m_type)->get_combo_box()->set_filament_idx(m_filament_idx);
             else {
-                wxGetApp().params_dialog()->Hide();
                 return false;
             }
         }
@@ -840,6 +832,15 @@ bool PlaterPresetComboBox::switch_to_tab()
         }
     }
     */
+
+    //BBS  Select NoteBook Tab params
+    if (tab->GetParent() == wxGetApp().params_panel())
+        wxGetApp().mainframe->select_tab(MainFrame::tp3DEditor);
+    else {
+        wxGetApp().params_dialog()->Popup();
+        tab->OnActivate();
+    }
+    tab->restore_last_select_item();
 
     return true;
 }
@@ -944,6 +945,7 @@ void PlaterPresetComboBox::update()
         selected_filament_preset = m_collection->find_preset(m_preset_bundle->filament_presets[m_filament_idx]);
         if (!selected_filament_preset) {
             //can not find this filament, should be caused by project embedded presets, will be updated later
+            Thaw();
             return;
         }
         //assert(selected_filament_preset);
@@ -1101,8 +1103,8 @@ void PlaterPresetComboBox::update()
         else if (m_type == Preset::TYPE_SLA_MATERIAL)
             set_label_marker(Append(separator(L("Add/Remove materials")), *bmp), LABEL_ITEM_WIZARD_MATERIALS);
         else {
-            set_label_marker(Append(separator(L("Select/Remove printers(system presets)")), *bmp), LABEL_ITEM_WIZARD_PRINTERS);
-            set_label_marker(Append(separator(L("Create printer")), *bmp), LABEL_ITEM_WIZARD_ADD_PRINTERS);
+            set_label_marker(Append(separator(L("Select/Remove printers (system presets)")), *bmp), LABEL_ITEM_WIZARD_PRINTERS);
+            // set_label_marker(Append(separator(L("Create printer")), *bmp), LABEL_ITEM_WIZARD_ADD_PRINTERS);
         }
     }
 

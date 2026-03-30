@@ -107,6 +107,15 @@ using ColorEvent = Event<wxColour>;
 wxDECLARE_EVENT(EVT_ADD_CUSTOM_FILAMENT, ColorEvent);
 const wxString DEFAULT_PROJECT_NAME = "Untitled";
 
+class SidebarProps
+{
+public:
+    static int TitlebarMargin();
+    static int ContentMargin();
+    static int IconSpacing();
+    static int ElementSpacing();
+};
+
 class Sidebar : public wxPanel
 {
     ConfigOptionMode    m_mode;
@@ -148,6 +157,9 @@ public:
     void load_ams_list(std::string const & device, MachineObject* obj);
     std::map<int, DynamicPrintConfig> build_filament_ams_list(MachineObject* obj);
     void sync_ams_list();
+    // Orca
+    void show_SEMM_buttons(bool bshow);
+    void update_dynamic_filament_list();
 
     ObjectList*             obj_list();
     ObjectSettings*         obj_settings();
@@ -256,11 +268,14 @@ public:
 
     // SoftFever
     void calib_pa(const Calib_Params& params);
-    void calib_flowrate(int pass);
+    void calib_flowrate(bool is_linear, int pass);
     void calib_temp(const Calib_Params& params);
     void calib_max_vol_speed(const Calib_Params& params);
     void calib_retraction(const Calib_Params& params);
     void calib_VFA(const Calib_Params& params);
+    void calib_input_shaping_freq(const Calib_Params& params);
+    void calib_input_shaping_damp(const Calib_Params& params);
+    void calib_junction_deviation(const Calib_Params& params);
 
     BuildVolume_Type get_build_volume_type() const;
 
@@ -527,6 +542,7 @@ public:
     //BBS: add clone logic
     void clone_selection();
     void center_selection();
+    void drop_selection();
     void search(bool plater_is_active, Preset::Type  type, wxWindow *tag, TextInput *etag, wxWindow *stag);
     void mirror(Axis axis);
     void split_object();
@@ -595,6 +611,7 @@ public:
     int select_plate_by_hover_id(int hover_id, bool right_click = false, bool isModidyPlateName = false);
     //BBS: delete the plate, index= -1 means the current plate
     int delete_plate(int plate_index = -1);
+    int duplicate_plate(int plate_index = -1);
     //BBS: select the sliced plate by index
     int select_sliced_plate(int plate_index);
     //BBS: set bed positions
@@ -776,6 +793,8 @@ public:
     };
     std::atomic<bool> m_arrange_running{false};
 
+    bool is_loading_project() const { return m_loading_project; }
+
 private:
     struct priv;
     std::unique_ptr<priv> p;
@@ -804,6 +823,7 @@ private:
     int start_next_slice();
 
     void _calib_pa_pattern(const Calib_Params& params);
+    void _calib_pa_pattern_gen_gcode();
     void _calib_pa_tower(const Calib_Params& params);
     void _calib_pa_select_added_objects();
 
