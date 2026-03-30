@@ -109,7 +109,7 @@ jobs:
             sudo chown $USER -R ./
             ./build_linux.sh -dr
             cd deps/build
-            tar -czvf OrcaSlicer_dep_ubuntu_$(date +"%Y%m%d").tar.gz destdir
+            tar -czvf Cosmos3D_dep_ubuntu_$(date +"%Y%m%d").tar.gz destdir
 
 
       # Upload Artifacts
@@ -117,14 +117,14 @@ jobs:
       #   if: inputs.os == 'macos-14'
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: OrcaSlicer_dep_mac_${{ env.date }}
+      #     name: Cosmos3D_dep_mac_${{ env.date }}
       #     path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep*.tar.gz
 
       - name: Upload Windows artifacts
         if: inputs.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: OrcaSlicer_dep_win64_${{ env.date }}
+          name: Cosmos3D_dep_win64_${{ env.date }}
           path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep*.zip
 
       - name: Upload Ubuntu artifacts
@@ -133,11 +133,11 @@ jobs:
           ubuntu-ver: ${{ (inputs.os == 'ubuntu-20.04' && '2004') || (inputs.os == 'ubuntu-24.04' && '2404') || '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: OrcaSlicer_dep_ubuntu_${{ env.ubuntu-ver }}_${{ env.date }}
-          path: ${{ github.workspace }}/deps/build/OrcaSlicer_dep_ubuntu_*.tar.gz
+          name: Cosmos3D_dep_ubuntu_${{ env.ubuntu-ver }}_${{ env.date }}
+          path: ${{ github.workspace }}/deps/build/Cosmos3D_dep_ubuntu_*.tar.gz
 
   build_orca:
-    name: Build OrcaSlicer
+    name: Build Cosmos3D
     needs: [build_deps]
     if: ${{ !cancelled() && !inputs.build-deps-only && (inputs.valid-cache == true && needs.build_deps.result == 'skipped') || (inputs.valid-cache != true && success()) }}
     uses: ./.github/workflows/build_orca.yml
