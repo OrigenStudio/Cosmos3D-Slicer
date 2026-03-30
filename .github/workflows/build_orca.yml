@@ -200,7 +200,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Cosmos3D_Windows_${{ env.ver }}
-          path: ${{ github.workspace }}/build/OrcaSlicer*.exe
+          path: ${{ github.workspace }}/build/Cosmos3D*.exe
 
       - name: Upload artifacts Win PDB
         if: inputs.os == 'windows-latest'
