@@ -839,8 +839,8 @@ elseif (SLIC3R_FHS)
     )
     install(FILES src/platform/unix/OrcaSlicer.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
     foreach(SIZE 32 128 192)
-        install(FILES ${SLIC3R_RESOURCES_DIR}/images/OrcaSlicer_${SIZE}px.png
-            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME OrcaSlicer.png
+        install(FILES ${SLIC3R_RESOURCES_DIR}/images/Cosmos3D_${SIZE}px.png
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME Cosmos3D.png
         )
     endforeach()
 elseif (CMAKE_MACOSX_BUNDLE)
@@ -858,24 +858,24 @@ set (CPACK_PACKAGE_VENDOR "SoftFever")
 set (CPACK_PACKAGE_VERSION_MAJOR "${ORCA_VERSION_MAJOR}")
 set (CPACK_PACKAGE_VERSION_MINOR "${ORCA_VERSION_MINOR}")
 set (CPACK_PACKAGE_VERSION_PATCH "${ORCA_VERSION_PATCH}")
-set (CPACK_PACKAGE_FILE_NAME "OrcaSlicer_Windows_Installer_V${SoftFever_VERSION}")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Orca Slicer is an open source slicer for FDM printers")
-set (CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/SoftFever/OrcaSlicer")
+set (CPACK_PACKAGE_FILE_NAME "Cosmos3D_Windows_Installer_V${SoftFever_VERSION}")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Cosmos3D is an open source slicer for FDM printers")
+set (CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/OrigenStudio/Cosmos3D-Slicer")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
-set (CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/resources/images\\\\OrcaSlicer.ico")
+set (CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/resources/images\\\\Cosmos3D.ico")
 set (CPACK_NSIS_MUI_ICON "${CPACK_PACKAGE_ICON}")
 set (CPACK_NSIS_MUI_UNIICON "${CPACK_PACKAGE_ICON}")
-set (CPACK_NSIS_INSTALLED_ICON_NAME  "$INSTDIR\\\\orca-slicer.exe")
+set (CPACK_NSIS_INSTALLED_ICON_NAME  "$INSTDIR\\\\cosmos3d.exe")
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-    CreateShortCut \\\"$DESKTOP\\\\OrcaSlicer.lnk\\\" \\\"$INSTDIR\\\\orca-slicer.exe\\\"
+    CreateShortCut \\\"$DESKTOP\\\\Cosmos3D.lnk\\\" \\\"$INSTDIR\\\\cosmos3d.exe\\\"
 ")
 set (CPACK_PACKAGE_CHECKSUM SHA256)
-set (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "OrcaSlicer")
+set (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "Cosmos3D")
 set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 # set (CPACK_NSIS_MODIFY_PATH "ON")
-set(CPACK_PACKAGE_EXECUTABLES "orca-slicer;OrcaSlicer")
-set(CPACK_CREATE_DESKTOP_LINKS "orca-slicer")
+set(CPACK_PACKAGE_EXECUTABLES "cosmos3d;Cosmos3D")
+set(CPACK_CREATE_DESKTOP_LINKS "cosmos3d")
 set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt) # must also include in install command
 
 set(CPACK_WIX_UPGRADE_GUID "058245e8-20e0-4a95-9ab7-1acfe17ad511")
