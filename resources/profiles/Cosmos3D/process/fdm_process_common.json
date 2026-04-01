@@ -66,5 +66,11 @@
     "enable_prime_tower": "0",
     "prime_tower_width": "60",
     "xy_hole_compensation": "0",
-    "xy_contour_compensation": "0"
+    "xy_contour_compensation": "0",
+    "seam_slope_type": "external",
+    "seam_slope_min_length": "150",
+    "seam_slope_steps": "10",
+    "seam_slope_inner_walls": "1",
+    "scarf_joint_speed": "100%",
+    "scarf_joint_flow_ratio": "1"
 }
