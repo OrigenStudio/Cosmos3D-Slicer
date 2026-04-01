@@ -1,0 +1,102 @@
+name: Bump version on PR merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main, feat/cosmos]
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump minor version
+        id: version
+        run: |
+          # Read current version
+          current=$(grep 'set(SoftFever_VERSION' version.inc | sed 's/.*"\(.*\)".*/\1/')
+          echo "Current version: $current"
+
+          # Strip any suffix like -dev, -rc1, etc.
+          base=$(echo "$current" | sed 's/-.*//')
+
+          # Split into major.minor.patch
+          IFS='.' read -r major minor patch <<< "$base"
+
+          # Bump minor, reset patch
+          new_minor=$((minor + 1))
+          new_version="${major}.${new_minor}.0"
+
+          echo "New version: $new_version"
+          echo "old_version=$current" >> $GITHUB_OUTPUT
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+          # Update version.inc
+          sed -i "s/set(SoftFever_VERSION \".*\")/set(SoftFever_VERSION \"${new_version}\")/" version.inc
+
+          # Verify
+          grep 'SoftFever_VERSION' version.inc
+
+      - name: Generate changelog entry
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          new_version="${{ steps.version.outputs.new_version }}"
+          date=$(date +'%Y-%m-%d')
+
+          # Extract summary section from PR body (between ## Summary and next ##)
+          summary=$(echo "$PR_BODY" | sed -n '/^## Summary/,/^## /{/^## Summary/d;/^## /d;p}' | sed '/^$/d' | head -10)
+
+          # Build the changelog entry
+          entry="## v${new_version} (${date})\n\n"
+          entry+="### ${PR_TITLE} (#${PR_NUMBER})\n\n"
+
+          if [ -n "$summary" ]; then
+            entry+="${summary}\n\n"
+          fi
+
+          entry+="**Author:** @${PR_AUTHOR}\n"
+
+          # Prepend to CHANGELOG.md (create if missing)
+          if [ -f CHANGELOG.md ]; then
+            # Insert after the first line (title)
+            {
+              head -1 CHANGELOG.md
+              echo ""
+              echo -e "$entry"
+              tail -n +2 CHANGELOG.md
+            } > CHANGELOG.tmp
+            mv CHANGELOG.tmp CHANGELOG.md
+          else
+            {
+              echo "# Cosmos3D Changelog"
+              echo ""
+              echo -e "$entry"
+            } > CHANGELOG.md
+          fi
+
+          echo "--- Changelog entry ---"
+          head -20 CHANGELOG.md
+
+      - name: Commit and push
+        run: |
+          new_version="${{ steps.version.outputs.new_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.inc CHANGELOG.md
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: bump version to ${new_version} and update changelog"
+          git push

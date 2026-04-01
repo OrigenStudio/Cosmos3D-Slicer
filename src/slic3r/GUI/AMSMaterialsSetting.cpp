@@ -130,7 +130,7 @@ void AMSMaterialsSetting::create_panel_normal(wxWindow* parent)
 
     wxBoxSizer* m_sizer_filament = new wxBoxSizer(wxHORIZONTAL);
 
-    m_title_filament = new wxStaticText(parent, wxID_ANY, _L("Filament"), wxDefaultPosition, wxSize(AMS_MATERIALS_SETTING_LABEL_WIDTH, -1), 0);
+    m_title_filament = new wxStaticText(parent, wxID_ANY, _L("Material"), wxDefaultPosition, wxSize(AMS_MATERIALS_SETTING_LABEL_WIDTH, -1), 0);
     m_title_filament->SetFont(::Label::Body_13);
     m_title_filament->SetForegroundColour(AMS_MATERIALS_SETTING_GREY800);
     m_title_filament->Wrap(-1);
