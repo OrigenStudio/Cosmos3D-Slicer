@@ -564,7 +564,7 @@ private:
 public:
 	//BBS: GUI refactor
 	TabFilament(ParamsPanel* parent) :
-		Tab(parent, _(L("Filament")), Slic3r::Preset::TYPE_FILAMENT) {}
+		Tab(parent, _(L("Material")), Slic3r::Preset::TYPE_FILAMENT) {}
 	~TabFilament() {}
 
 	void		build() override;
