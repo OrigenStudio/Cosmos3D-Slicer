@@ -4,7 +4,7 @@
   "from": "system",
   "setting_id": "GM001",
   "instantiation": "true",
-  "nozzle_diameter": ["60"],
+  "nozzle_diameter": ["50"],
   "printer_model": "Cosmos3D X1",
   "printer_variant": "60",
   "gcode_flavor": "marlin",
