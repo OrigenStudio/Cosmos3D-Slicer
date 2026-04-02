@@ -1,5 +1,17 @@
 # Cosmos3D Changelog
 
+## v2.6.0 (2026-04-02)
+
+### Display weight in kg, classic wall generator, nozzle 50mm (#20)
+
+- **Weight display in kg**: Convert material weight from grams to kilograms in all UI display points (sidebar, popup, plate data). Internal calculations and G-code comments remain in grams for backward compatibility
+- **Classic wall generator**: Set default wall generator to "classic" instead of "arachne" — constant extrusion width is more suitable for concrete printing
+- **Nozzle 50mm**: Default nozzle diameter changed from 60mm to 50mm
+- **Force profile update**: Bumped vendor profile version to 02.02.00.00 with force_update to overwrite cached presets
+
+**Author:** @PolGuixe
+
+
 ## v2.5.0 (2026-04-02)
 
 ### Config: default nozzle size 50mm (#19)
