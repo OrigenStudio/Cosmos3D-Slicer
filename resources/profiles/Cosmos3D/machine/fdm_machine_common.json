@@ -77,7 +77,7 @@
     "extruder_clearance_height_to_rod": "3000",
     "extruder_clearance_height_to_lid": "3000",
     "nozzle_diameter": [
-        "60"
+        "50"
     ],
     "printer_settings_id": "",
     "printer_variant": "60",
