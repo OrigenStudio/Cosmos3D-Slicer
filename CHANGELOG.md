@@ -1,5 +1,15 @@
 # Cosmos3D Changelog
 
+## v2.5.0 (2026-04-02)
+
+### Config: default nozzle size 50mm (#19)
+
+- Change default nozzle diameter from 60mm to 50mm across all Cosmos3D machine profiles
+- Sync version bump (2.4.0) from main
+
+**Author:** @PolGuixe
+
+
 ## v2.4.0 (2026-04-01)
 
 ### Cosmos3D: scarf joint defaults, UI renaming, and auto version bump (#18)
