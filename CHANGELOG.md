@@ -1,5 +1,17 @@
 # Cosmos3D Changelog
 
+## v2.7.0 (2026-04-02)
+
+### Rebrand setup wizard: logos, text, and HTML fallbacks (#21)
+
+- **Replace wizard logos**: `resources/web/image/logo.png` and `logo2.png` now show Cosmos3D icon instead of OrcaSlicer octopus
+- **Fix wizard text**: Replace all "Orca Slicer" / "OrcaSlicer" references in `resources/web/data/text.js` across all 12+ languages (112 occurrences)
+- **Fix HTML fallbacks**: Update hardcoded fallback text in wizard pages 1, 5, and 6
+- **Classic wall generator**: Set default to "classic" instead of "arachne" for concrete printing
+
+**Author:** @PolGuixe
+
+
 ## v2.6.0 (2026-04-02)
 
 ### Display weight in kg, classic wall generator, nozzle 50mm (#20)
