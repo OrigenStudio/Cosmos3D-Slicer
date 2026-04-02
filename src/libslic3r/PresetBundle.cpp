@@ -44,10 +44,10 @@ static std::vector<std::string> s_project_options {
 };
 
 //Orca: add custom as default
-const char *PresetBundle::ORCA_DEFAULT_BUNDLE = "Custom";
-const char *PresetBundle::ORCA_DEFAULT_PRINTER_MODEL = "MyKlipper 0.4 nozzle";
-const char *PresetBundle::ORCA_DEFAULT_PRINTER_VARIANT = "0.4";
-const char *PresetBundle::ORCA_DEFAULT_FILAMENT = "Generic PLA @System";
+const char *PresetBundle::ORCA_DEFAULT_BUNDLE = "Cosmos3D";
+const char *PresetBundle::ORCA_DEFAULT_PRINTER_MODEL = "Cosmos3D X1 60 nozzle";
+const char *PresetBundle::ORCA_DEFAULT_PRINTER_VARIANT = "50";
+const char *PresetBundle::ORCA_DEFAULT_FILAMENT = "Generic Concrete";
 const char *PresetBundle::ORCA_FILAMENT_LIBRARY = "OrcaFilamentLibrary";
 
 PresetBundle::PresetBundle()
