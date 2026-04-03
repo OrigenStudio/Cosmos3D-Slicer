@@ -1,7 +1,7 @@
 {
   "type": "process",
   "inherits": "fdm_process_common",
-  "name": "Concrete Printing @Cosmos3D X1 60 nozzle",
+  "name": "Concrete Printing @Cosmos3D X1 50 nozzle",
   "instantiation": "true",
   "adaptive_layer_height": "0",
   "reduce_crossing_wall": "0",
@@ -108,6 +108,6 @@
   "seam_slope_inner_walls": "1",
   "scarf_joint_speed": "100%",
   "scarf_joint_flow_ratio": "1",
-  "compatible_printers": ["Cosmos3D X1 60 nozzle"],
+  "compatible_printers": ["Cosmos3D X1 50 nozzle"],
   "post_process": ""
 }

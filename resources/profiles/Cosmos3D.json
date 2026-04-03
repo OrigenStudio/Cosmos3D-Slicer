@@ -15,8 +15,8 @@
             "sub_path": "process/fdm_process_common.json"
         },
 		{
-             "name": "Concrete Printing @Cosmos3D X1 60 nozzle",
-             "sub_path": "process/Concrete Printing @Cosmos3D X1 60 nozzle.json"
+             "name": "Concrete Printing @Cosmos3D X1 50 nozzle",
+             "sub_path": "process/Concrete Printing @Cosmos3D X1 50 nozzle.json"
         }
     ],
     "filament_list": [
@@ -39,8 +39,8 @@
             "sub_path": "machine/fdm_machine_common.json"
         },
         {     
-	        "name": "Cosmos3D X1 60 nozzle",
-            "sub_path": "machine/Cosmos3D X1 60 nozzle.json"
+	        "name": "Cosmos3D X1 50 nozzle",
+            "sub_path": "machine/Cosmos3D X1 50 nozzle.json"
         }
     ]
 }

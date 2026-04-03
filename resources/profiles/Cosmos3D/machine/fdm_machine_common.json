@@ -114,7 +114,7 @@
         "1"
     ],
     "z_hop_types": "Normal Lift",
-    "default_print_profile": "50mm Standard @Cosmos3D X1 60 nozzle",
+    "default_print_profile": "50mm Standard @Cosmos3D X1 50 nozzle",
     "machine_start_gcode": "COSMOS",
     "machine_end_gcode": "N3960 END: G91 G1 X100 Z20\nN3970\nN3980 REPEAT BEGIN END P=50\nN3990\nN4000 CT Y-80\nN4010 M5\nN4020 M30",
     "before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\nG92 E0\n;[layer_z]\n\n"

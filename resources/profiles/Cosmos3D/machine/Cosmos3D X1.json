@@ -1,7 +1,7 @@
 {
     "type": "machine_model",
     "name": "Cosmos3D X1",
-    "model_id": "Cosmos3D_X1",
+    "model_id": "Cosmos3D X1",
     "nozzle_diameter": "50",
     "machine_tech": "FFF",
     "family": "Cosmos3D",
