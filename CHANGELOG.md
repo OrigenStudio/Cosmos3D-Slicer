@@ -1,5 +1,23 @@
 # Cosmos3D Changelog
 
+## v2.8.0 (2026-04-03)
+
+### Fix default printer selection and rename profile to 50 nozzle (#22)
+
+Fix Cosmos3D printer not being selected as default on fresh install.
+### Root cause
+Two bugs in `PresetBundle.cpp`:
+1. `ORCA_DEFAULT_PRINTER_MODEL` was `"Cosmos3D X1 60 nozzle"` (preset name) instead of `"Cosmos3D X1"` (printer_model field) — `find_system_preset_by_model_and_variant()` never matched
+2. `ORCA_DEFAULT_PRINTER_VARIANT` was `"50"` but `printer_variant` was `"60"` — variant comparison also failed
+### Fix
+- Set `ORCA_DEFAULT_PRINTER_MODEL = "Cosmos3D X1"` and `ORCA_DEFAULT_PRINTER_VARIANT = "50"`
+- Rename all profile references from "60 nozzle" to "50 nozzle" to match actual nozzle diameter
+- Rename JSON files: `Cosmos3D X1 60 nozzle.json` → `Cosmos3D X1 50 nozzle.json`
+- Update `printer_variant` from `"60"` to `"50"`
+
+**Author:** @PolGuixe
+
+
 ## v2.7.0 (2026-04-02)
 
 ### Rebrand setup wizard: logos, text, and HTML fallbacks (#21)
