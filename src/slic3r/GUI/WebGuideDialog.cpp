@@ -871,6 +871,7 @@ bool GuideFrame::run()
 
         app.app_config->set_legacy_datadir(false);
         app.update_mode();
+        app.app_config->save();
         // BBS
         //app.obj_manipul()->update_ui_from_settings();
         BOOST_LOG_TRIVIAL(info) << "GuideFrame applied";

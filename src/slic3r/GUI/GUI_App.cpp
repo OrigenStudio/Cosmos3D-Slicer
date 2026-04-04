@@ -6303,6 +6303,7 @@ bool GUI_App::run_wizard(ConfigWizard::RunReason reason, ConfigWizard::StartPage
         load_current_presets();
         update_publish_status();
         mainframe->refresh_plugin_tips();
+        app_config->save();
         // BBS: remove SLA related message
     }
 
