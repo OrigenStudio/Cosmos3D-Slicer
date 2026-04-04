@@ -1,5 +1,20 @@
 # Cosmos3D Changelog
 
+## v2.9.0 (2026-04-04)
+
+### Fix wizard reopening every launch and printer not persisting (#23)
+
+Fix two related bugs: the setup wizard opens every time the app launches, and the default printer selection is never saved.
+### Root cause
+`apply_config()` in `WebGuideDialog.cpp` sets vendor/printer/filament data into `app_config` in memory, but neither the wizard dialog nor the caller (`GUI_App::run_wizard()`) ever called `app_config->save()` afterward. On next launch, the config loaded without printer data → `only_default_printers()` returned true → wizard reopened.
+### Fix
+Add `app_config->save()` in two places:
+- `WebGuideDialog::run()` — after `apply_config()` completes (belt)
+- `GUI_App::run_wizard()` — after `wizard.run()` returns successfully (suspenders)
+
+**Author:** @PolGuixe
+
+
 ## v2.8.0 (2026-04-03)
 
 ### Fix default printer selection and rename profile to 50 nozzle (#22)
