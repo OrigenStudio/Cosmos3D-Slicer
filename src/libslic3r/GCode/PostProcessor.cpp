@@ -229,6 +229,9 @@ void gcode_add_line_number(const std::string& path, const DynamicPrintConfig& co
 }
 
 // Cosmos3D embedded post-processing script
+// Converts OrcaSlicer G-code to Sinumerik CNC compatible format.
+// Uses a whitelist approach: only G1 X/Y moves pass through.
+// Adds Sinumerik header (CYCLE832, M3), N-line numbering, layer Z transitions, and footer (M5, M30).
 bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrintConfig &config)
 {
     // Check if this is a Cosmos3D printer
@@ -244,6 +247,11 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
         return false;
     }
 
+    // Regex patterns (compiled once)
+    boost::regex re_e_value(R"(\sE[-+]?[0-9]*\.?[0-9]+)");
+    boost::regex re_f_value(R"(\sF[-+]?[0-9]*\.?[0-9]+)");
+    boost::regex re_z_value(R"(\sZ([-+]?[0-9]*\.?[0-9]+))");
+
     try {
         // Read the entire G-code file
         std::ifstream input_file(gcode_path);
@@ -254,11 +262,17 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
 
         std::vector<std::string> cleaned_lines;
         std::string line;
-        bool keep_processing = false; // Flag to start processing after "COSMOS" marker
+        bool keep_processing = false;
+        std::string current_layer_z;
+        bool first_layer = true;
+
+        // Sinumerik header
+        cleaned_lines.push_back("CYCLE832 (10,_ROUGH,1)");
+        cleaned_lines.push_back("G1 Z0 F1500");
+        cleaned_lines.push_back("M3 F4000");
 
         // Process the G-code line by line
         while (std::getline(input_file, line)) {
-            // Trim whitespace
             boost::trim(line);
 
             // Start processing only after the "COSMOS" marker
@@ -267,73 +281,72 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
                 continue;
             }
 
-            if (!keep_processing) {
+            if (!keep_processing)
                 continue;
-            }
 
-            // Keep layer change markers but modify them
-            if (line == ";LAYER_CHANGE") {
-                cleaned_lines.push_back(";LAYER_CHANGE M3");
+            // Track layer changes — extract Z height from before_layer_change comment
+            if (line.find(";BEFORE_LAYER_CHANGE") != std::string::npos)
                 continue;
-            }
 
-            // Skip other comment lines (starting with semicolon)
-            if (!line.empty() && line[0] == ';') {
-                continue;
-            }
-
-            // Skip progress update commands (M73)
-            if (line.find("M73") != std::string::npos) {
-                continue;
-            }
-
-            // Process G1 movement commands
-            if (line.find("G1") == 0) {
-                // Remove extruder (E) values but keep the rest of the line
-                std::string cleaned_line = line;
-                // Use regex to remove E values
-                cleaned_line = boost::regex_replace(cleaned_line, boost::regex(R"(\sE[-+]?[0-9]*\.?[0-9]+)"), "");
-
-                // Keep any line that has X or Y coordinates
-                if (cleaned_line.find('X') != std::string::npos || cleaned_line.find('Y') != std::string::npos) {
-                    cleaned_lines.push_back(cleaned_line);
-                    continue;
+            // Capture Z height from the ;{layer_z} comment line
+            if (line.size() > 1 && line[0] == ';' && std::isdigit(line[1])) {
+                current_layer_z = line.substr(1);
+                boost::trim(current_layer_z);
+                if (!current_layer_z.empty() && !first_layer) {
+                    cleaned_lines.push_back("G1 Z" + current_layer_z);
                 }
-
-                // Skip lines that only have Z movement (with optional F parameter)
-                if (boost::regex_match(cleaned_line, boost::regex(R"(G1\s+Z[-+]?[0-9]*\.?[0-9]+(?:\s+F[-+]?[0-9]*\.?[0-9]+)?)"))) {
-                    continue;
-                }
-
-                // Skip lines that only have feed rate (F parameter)
-                if (boost::regex_match(cleaned_line, boost::regex(R"(G1\s+F[-+]?[0-9]*\.?[0-9]+)"))) {
-                    continue;
-                }
-
-                // Add other G1 commands
-                cleaned_lines.push_back(cleaned_line);
+                first_layer = false;
                 continue;
             }
 
-            // Add all other non-comment, non-M73 lines
-            cleaned_lines.push_back(line);
+            // Skip all comment lines
+            if (!line.empty() && line[0] == ';')
+                continue;
+
+            // WHITELIST: Only process G1 commands with X or Y coordinates
+            if (line.find("G1") == 0 || line.find("G0") == 0) {
+                std::string cleaned = line;
+                // Normalize G0 to G1
+                if (cleaned.find("G0") == 0)
+                    cleaned.replace(0, 2, "G1");
+                // Strip E values
+                cleaned = boost::regex_replace(cleaned, re_e_value, "");
+                // Strip F values
+                cleaned = boost::regex_replace(cleaned, re_f_value, "");
+                // Strip Z values (Z is handled via layer transitions)
+                cleaned = boost::regex_replace(cleaned, re_z_value, "");
+                boost::trim(cleaned);
+
+                // Only keep if it has X or Y coordinates
+                if (cleaned.find('X') != std::string::npos || cleaned.find('Y') != std::string::npos) {
+                    cleaned_lines.push_back(cleaned);
+                }
+                continue;
+            }
+
+            // Everything else is dropped (whitelist approach)
+            // This silently discards: G21, G28, G92, M104, M109, M140, M190, M106, M107, M73, etc.
         }
 
         input_file.close();
 
-        // Write the cleaned G-code back to the file
+        // Sinumerik footer
+        cleaned_lines.push_back("M5");
+        cleaned_lines.push_back("M30");
+
+        // Write with N-line numbering
         std::ofstream output_file(gcode_path);
         if (!output_file.is_open()) {
             BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: Cannot open G-code file for writing: " << gcode_path;
             return false;
         }
 
-        for (const auto& cleaned_line : cleaned_lines) {
-            output_file << cleaned_line << "\n";
+        for (size_t i = 0; i < cleaned_lines.size(); ++i) {
+            output_file << "N" << (i + 1) << " " << cleaned_lines[i] << "\n";
         }
         output_file.close();
 
-        BOOST_LOG_TRIVIAL(info) << "Cosmos3D post-processing completed successfully";
+        BOOST_LOG_TRIVIAL(info) << "Cosmos3D post-processing completed successfully. Output " << cleaned_lines.size() << " lines.";
         return true;
 
     } catch (const std::exception &ex) {
