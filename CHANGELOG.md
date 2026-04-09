@@ -1,5 +1,23 @@
 # Cosmos3D Changelog
 
+## v2.10.0 (2026-04-09)
+
+### Rewrite G-code post-processor for Sinumerik CNC compatibility (#24)
+
+Complete rewrite of the Cosmos3D embedded G-code post-processor to produce output compatible with the Sinumerik CNC controller. Based on the client's working reference file.
+### What changed
+**Post-processor (`PostProcessor.cpp`):**
+- **Whitelist approach** instead of blacklist: only `G1 X/Y` moves pass through. All other commands (G0, G21, G28, G92, M104, M109, M140, M190, M106, M107, M73, etc.) are silently discarded — this fixes the "printer stops at random points" issue
+- **Sinumerik header**: `CYCLE832 (10,_ROUGH,1)`, `G1 Z0 F1500`, `M3 F4000`
+- **N-line numbering**: every output line gets sequential `N1`, `N2`, `N3`...
+- **Strip E, F, Z values** from G1 move lines — speed is set by M3, extrusion by spindle, Z by layer transitions
+- **Convert G0 → G1** (Sinumerik may not support G0 in this context)
+- **Layer Z transitions**: `G1 Z{height}` inserted at each layer change
+- **Footer**: `M5` (stop concrete), `M30` (end program)
+
+**Author:** @PolGuixe
+
+
 ## v2.9.0 (2026-04-04)
 
 ### Fix wizard reopening every launch and printer not persisting (#23)
