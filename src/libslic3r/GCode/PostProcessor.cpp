@@ -314,14 +314,9 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
         std::string current_layer_z;
         bool first_layer = true;
 
-        // Sinumerik header
-        cleaned_lines.push_back("CYCLE832 (10,_ROUGH,1)");
-        cleaned_lines.push_back("G1 Z0 F1500");
-        cleaned_lines.push_back("M3 F4000");
-
         // Cosmos3D config header (as Sinumerik comments)
-        char buf[256];
         cleaned_lines.push_back("; --- Cosmos3D Slicer Configuration ---");
+        char buf[256];
         snprintf(buf, sizeof(buf), "; Printer: %s", printer_name.c_str());
         cleaned_lines.push_back(buf);
         snprintf(buf, sizeof(buf), "; Layer height: %.2f mm", layer_height);
@@ -355,6 +350,11 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
         snprintf(buf, sizeof(buf), "; Material cost: %.2f /kg", filament_cost);
         cleaned_lines.push_back(buf);
         cleaned_lines.push_back("; --- End Configuration ---");
+
+        // Sinumerik startup sequence
+        cleaned_lines.push_back("CYCLE832 (10,_ROUGH,1)");
+        cleaned_lines.push_back("G1 Z0 F1500");
+        cleaned_lines.push_back("M3 F4000");
 
         // Process the G-code line by line (second pass)
         while (std::getline(input_file2, line)) {
