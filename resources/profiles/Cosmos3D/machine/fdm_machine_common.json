@@ -117,5 +117,5 @@
     "default_print_profile": "50mm Standard @Cosmos3D X1 50 nozzle",
     "machine_start_gcode": "COSMOS",
     "machine_end_gcode": "",
-    "before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\n;[layer_z]\n"
+    "before_layer_change_gcode": ";BEFORE_LAYER_CHANGE\nG92 E0\n;[layer_z]\n"
 }
