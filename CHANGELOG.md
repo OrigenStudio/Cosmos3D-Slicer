@@ -1,5 +1,23 @@
 # Cosmos3D Changelog
 
+## v2.11.0 (2026-04-16)
+
+### Add slicer configuration header to G-code output (#25)
+
+Add a configuration summary block as comments at the top of Cosmos3D G-code output, between the Sinumerik header and the toolpath moves.
+### Example output
+```
+N1 CYCLE832 (10,_ROUGH,1)
+N2 G1 Z0 F1500
+N3 M3 F4000
+N4 ; --- Cosmos3D Slicer Configuration ---
+N5 ; Printer: Cosmos3D X1
+N6 ; Layer height: 22.00 mm
+N7 ; Nozzle diameter: 50.00 mm
+
+**Author:** @PolGuixe
+
+
 ## v2.10.0 (2026-04-09)
 
 ### Rewrite G-code post-processor for Sinumerik CNC compatibility (#24)
