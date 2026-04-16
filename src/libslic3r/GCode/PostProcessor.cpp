@@ -252,16 +252,64 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
     boost::regex re_f_value(R"(\sF[-+]?[0-9]*\.?[0-9]+)");
     boost::regex re_z_value(R"(\sZ([-+]?[0-9]*\.?[0-9]+))");
 
+    // Extract config values for header comments
+    auto get_float = [&config](const char *key, double fallback = 0.0) -> double {
+        const auto *opt = config.opt<ConfigOptionFloat>(key);
+        return opt ? opt->value : fallback;
+    };
+    auto get_floats_first = [&config](const char *key, double fallback = 0.0) -> double {
+        const auto *opt = config.opt<ConfigOptionFloats>(key);
+        return (opt && !opt->values.empty()) ? opt->values[0] : fallback;
+    };
+    auto get_string = [&config](const char *key) -> std::string {
+        const auto *opt = config.opt<ConfigOptionString>(key);
+        return opt ? opt->value : std::string();
+    };
+
+    double layer_height    = get_float("layer_height");
+    double nozzle_diam     = get_floats_first("nozzle_diameter");
+    double flow_ratio      = get_floats_first("filament_flow_ratio", 1.0);
+    double filament_density = get_floats_first("filament_density");
+    double filament_cost   = get_floats_first("filament_cost");
+    double outer_wall_speed = get_float("outer_wall_speed");
+    std::string printer_name = printer_model->value;
+
     try {
-        // Read the entire G-code file
+        // Read the entire G-code file — first pass to extract volume/cost from slicer comments
         std::ifstream input_file(gcode_path);
         if (!input_file.is_open()) {
             BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: Cannot open G-code file for reading: " << gcode_path;
             return false;
         }
 
-        std::vector<std::string> cleaned_lines;
+        std::string total_volume_str, total_weight_str, total_cost_str, filament_type_str;
         std::string line;
+        while (std::getline(input_file, line)) {
+            boost::trim(line);
+            if (line.find("; filament used [cm3] = ") == 0)
+                total_volume_str = line.substr(24);
+            else if (line.find("; total filament used [g] = ") == 0)
+                total_weight_str = line.substr(28);
+            else if (line.find("; filament used [g] = ") == 0 && total_weight_str.empty())
+                total_weight_str = line.substr(22);
+            else if (line.find("; filament cost = ") == 0)
+                total_cost_str = line.substr(18);
+            else if (line.find("; filament_type = ") == 0)
+                filament_type_str = line.substr(18);
+        }
+        input_file.close();
+        boost::trim(total_volume_str);
+        boost::trim(total_weight_str);
+        boost::trim(total_cost_str);
+
+        // Second pass — process the G-code
+        std::ifstream input_file2(gcode_path);
+        if (!input_file2.is_open()) {
+            BOOST_LOG_TRIVIAL(error) << "Cosmos3D post-processing: Cannot open G-code file for reading: " << gcode_path;
+            return false;
+        }
+
+        std::vector<std::string> cleaned_lines;
         bool keep_processing = false;
         std::string current_layer_z;
         bool first_layer = true;
@@ -271,8 +319,45 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
         cleaned_lines.push_back("G1 Z0 F1500");
         cleaned_lines.push_back("M3 F4000");
 
-        // Process the G-code line by line
-        while (std::getline(input_file, line)) {
+        // Cosmos3D config header (as Sinumerik comments)
+        char buf[256];
+        cleaned_lines.push_back("; --- Cosmos3D Slicer Configuration ---");
+        snprintf(buf, sizeof(buf), "; Printer: %s", printer_name.c_str());
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Layer height: %.2f mm", layer_height);
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Nozzle diameter: %.2f mm", nozzle_diam);
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Line width: %.2f mm", nozzle_diam);
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Flow ratio: %.2f", flow_ratio);
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Print speed: %.0f mm/s", outer_wall_speed);
+        cleaned_lines.push_back(buf);
+        if (!total_volume_str.empty()) {
+            snprintf(buf, sizeof(buf), "; Volume: %s cm3", total_volume_str.c_str());
+            cleaned_lines.push_back(buf);
+        }
+        if (!total_weight_str.empty()) {
+            snprintf(buf, sizeof(buf), "; Material used: %s g", total_weight_str.c_str());
+            cleaned_lines.push_back(buf);
+        }
+        if (!total_cost_str.empty()) {
+            snprintf(buf, sizeof(buf), "; Cost: %s", total_cost_str.c_str());
+            cleaned_lines.push_back(buf);
+        }
+        if (!filament_type_str.empty()) {
+            snprintf(buf, sizeof(buf), "; Material profile: %s", filament_type_str.c_str());
+            cleaned_lines.push_back(buf);
+        }
+        snprintf(buf, sizeof(buf), "; Material density: %.2f g/cm3", filament_density);
+        cleaned_lines.push_back(buf);
+        snprintf(buf, sizeof(buf), "; Material cost: %.2f /kg", filament_cost);
+        cleaned_lines.push_back(buf);
+        cleaned_lines.push_back("; --- End Configuration ---");
+
+        // Process the G-code line by line (second pass)
+        while (std::getline(input_file2, line)) {
             boost::trim(line);
 
             // Start processing only after the "COSMOS" marker
@@ -328,7 +413,7 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
             // This silently discards: G21, G28, G92, M104, M109, M140, M190, M106, M107, M73, etc.
         }
 
-        input_file.close();
+        input_file2.close();
 
         // Sinumerik footer
         cleaned_lines.push_back("M5");
