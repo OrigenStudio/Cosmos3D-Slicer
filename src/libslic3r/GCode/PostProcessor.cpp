@@ -250,7 +250,6 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
     // Regex patterns (compiled once)
     boost::regex re_e_value(R"(\sE[-+]?[0-9]*\.?[0-9]+)");
     boost::regex re_f_value(R"(\sF[-+]?[0-9]*\.?[0-9]+)");
-    boost::regex re_z_value(R"(\sZ([-+]?[0-9]*\.?[0-9]+))");
 
     // Extract config values for header comments
     auto get_float = [&config](const char *key, double fallback = 0.0) -> double {
@@ -311,8 +310,6 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
 
         std::vector<std::string> cleaned_lines;
         bool keep_processing = false;
-        std::string current_layer_z;
-        bool first_layer = true;
 
         // Cosmos3D config header (as Sinumerik comments)
         cleaned_lines.push_back("; --- Cosmos3D Slicer Configuration ---");
@@ -369,41 +366,34 @@ bool run_cosmos_post_processing(const std::string &gcode_path, const DynamicPrin
             if (!keep_processing)
                 continue;
 
-            // Track layer changes — extract Z height from before_layer_change comment
-            if (line.find(";BEFORE_LAYER_CHANGE") != std::string::npos)
-                continue;
-
-            // Capture Z height from the ;{layer_z} comment line
-            if (line.size() > 1 && line[0] == ';' && std::isdigit(line[1])) {
-                current_layer_z = line.substr(1);
-                boost::trim(current_layer_z);
-                if (!current_layer_z.empty() && !first_layer) {
-                    cleaned_lines.push_back("G1 Z" + current_layer_z);
-                }
-                first_layer = false;
-                continue;
-            }
-
-            // Skip all comment lines
+            // Skip all comment lines (including ;BEFORE_LAYER_CHANGE and the ;{layer_z} marker).
+            // Z is no longer reconstructed here — real Z values flow through below so that
+            // both per-layer steps and the scarf-joint Z ramp are preserved.
             if (!line.empty() && line[0] == ';')
                 continue;
 
-            // WHITELIST: Only process G1 commands with X or Y coordinates
-            if (line.find("G1") == 0 || line.find("G0") == 0) {
+            // WHITELIST: Only process G0/G1 motion commands. Match the leading opcode
+            // as an exact token (up to the first space) so near-miss codes such as
+            // G10/G11/G17/G19 are NOT mistaken for G1 and leaked through.
+            const std::string opcode = line.substr(0, line.find_first_of(" \t"));
+            if (opcode == "G0" || opcode == "G1") {
                 std::string cleaned = line;
                 // Normalize G0 to G1
-                if (cleaned.find("G0") == 0)
+                if (opcode == "G0")
                     cleaned.replace(0, 2, "G1");
-                // Strip E values
+                // Strip E values (continuous concrete extrusion — no E axis)
                 cleaned = boost::regex_replace(cleaned, re_e_value, "");
                 // Strip F values
                 cleaned = boost::regex_replace(cleaned, re_f_value, "");
-                // Strip Z values (Z is handled via layer transitions)
-                cleaned = boost::regex_replace(cleaned, re_z_value, "");
                 boost::trim(cleaned);
 
-                // Only keep if it has X or Y coordinates
-                if (cleaned.find('X') != std::string::npos || cleaned.find('Y') != std::string::npos) {
+                // Keep any move that still carries an axis word (X/Y for in-plane moves,
+                // Z for layer steps and the scarf-joint ramp). Z must NOT be stripped:
+                // doing so flattens the sloped seam into an overlapping flat bead (a filled
+                // scarf joint). Requires the controller to honour simultaneous X/Y/Z G1.
+                if (cleaned.find('X') != std::string::npos ||
+                    cleaned.find('Y') != std::string::npos ||
+                    cleaned.find('Z') != std::string::npos) {
                     cleaned_lines.push_back(cleaned);
                 }
                 continue;
