@@ -1,5 +1,12 @@
 # Cosmos3D Changelog
 
+## v2.12.0 (2026-07-02)
+
+### fix: eliminate layer-change travel bead and preserve scarf joint (#26)
+
+**Author:** @PolGuixe
+
+
 ## v2.11.0 (2026-04-16)
 
 ### Add slicer configuration header to G-code output (#25)
