@@ -4433,6 +4433,17 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(false));
 
+    def = this->add("seam_slope_ramp_only", coBool);
+    def->label = L("Ramp-only scarf (continuous layer transition)");
+    def->tooltip = L("Print only the climbing ramp of the scarf and skip the overlapping end pass. "
+                     "The wall loop then finishes exactly where the next layer's ramp begins, so the "
+                     "layer transition becomes one continuous extrusion with no travel, lift or plunge "
+                     "at the seam. Intended for continuous-flow extruders that cannot retract "
+                     "(e.g. concrete printing). Scarf start height should be 0 so the ramp spans the "
+                     "full layer height.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(false));
+
     def = this->add("role_based_wipe_speed", coBool);
     def->label = L("Role base wipe speed");
     def->tooltip = L("The wipe speed is determined by the speed of the current extrusion role. "

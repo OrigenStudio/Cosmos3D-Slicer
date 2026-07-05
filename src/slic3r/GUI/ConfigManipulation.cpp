@@ -832,6 +832,7 @@ void ConfigManipulation::toggle_print_fff_options(DynamicPrintConfig *config, co
     toggle_line("seam_slope_min_length", has_seam_slope);
     toggle_line("seam_slope_steps", has_seam_slope);
     toggle_line("seam_slope_inner_walls", has_seam_slope);
+    toggle_line("seam_slope_ramp_only", has_seam_slope);
     toggle_line("scarf_joint_speed", has_seam_slope);
     toggle_line("scarf_joint_flow_ratio", has_seam_slope);
     toggle_field("seam_slope_min_length", !config->opt_bool("seam_slope_entire_loop"));

@@ -106,6 +106,8 @@
   "seam_slope_min_length": "150",
   "seam_slope_steps": "10",
   "seam_slope_inner_walls": "1",
+  "seam_slope_ramp_only": "1",
+  "seam_slope_start_height": "0",
   "scarf_joint_speed": "100%",
   "scarf_joint_flow_ratio": "1",
   "compatible_printers": ["Cosmos3D X1 50 nozzle"],
