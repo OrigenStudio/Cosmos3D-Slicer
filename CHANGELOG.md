@@ -1,5 +1,15 @@
 # Cosmos3D Changelog
 
+## v2.13.0 (2026-07-05)
+
+### feat: ramp-only scarf for continuous, travel-free layer transitions (#27)
+
+Adds a ramp-only scarf-joint mode so the Cosmos3D concrete printer gets a continuous, travel-free layer transition instead of the back-and-forth the stock Orca scarf produces.
+The stock Orca scarf prints a climbing ramp at loop start and then re-traces the same scarf zone as a flow-tapered end pass. That strands the nozzle ~130 mm past the seam, forcing a return travel plus a full-layer-height plunge at every layer change to reach the next ramp's start. On the Sinumerik machine — which extrudes concrete continuously and cannot retract — that return move drools a stray bead. This is the client-reported "nozzle goes back".
+
+**Author:** @PolGuixe
+
+
 ## v2.12.0 (2026-07-02)
 
 ### fix: eliminate layer-change travel bead and preserve scarf joint (#26)
