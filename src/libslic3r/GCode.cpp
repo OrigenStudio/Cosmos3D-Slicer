@@ -4674,6 +4674,20 @@ std::string GCode::extrude_loop(ExtrusionLoop loop, std::string description, dou
         loop.split_at(last_pos, false);
 
     const auto seam_scarf_type = m_config.seam_slope_type.value;
+
+    // Ramp-only scarf: anchor the seam exactly where the previous layer's loop
+    // finished, so the layer transition is one continuous extrusion. The seam
+    // placer can jitter a few mm along smooth walls between layers; only snap
+    // when its choice is already close (same wall position).
+    if (m_config.seam_slope_ramp_only.value && seam_scarf_type != SeamScarfType::None &&
+        !m_config.spiral_mode && description == "perimeter" && m_last_pos_defined && layer_id() > 0 &&
+        !loop.paths.empty()) {
+        const Point  placed = loop.paths.front().first_point();
+        const double snap_r = scale_(EXTRUDER_CONFIG(nozzle_diameter));
+        if ((last_pos - placed).cast<double>().norm() < snap_r)
+            loop.split_at(last_pos, false, scale_(0.01));
+    }
+
     bool enable_seam_slope = ((seam_scarf_type == SeamScarfType::External && !is_hole) || seam_scarf_type == SeamScarfType::All) &&
         !m_config.spiral_mode &&
         (loop.role() == erExternalPerimeter || (loop.role() == erPerimeter && m_config.seam_slope_inner_walls)) &&
@@ -4843,7 +4857,33 @@ std::string GCode::extrude_loop(ExtrusionLoop loop, std::string description, dou
 
         // Calculate the sloped loop
         ExtrusionLoopSloped new_loop(paths, seam_gap, slope_min_length, slope_max_segment_length, start_slope_ratio, loop.loop_role());
-        new_loop.clip_slope(seam_gap);
+
+        const bool ramp_only = m_config.seam_slope_ramp_only.value;
+        if (ramp_only) {
+            // Ramp-only scarf: skip the overlapping end pass and keep the ramp
+            // anchored at the seam vertex, so the loop finishes exactly where the
+            // next layer's ramp begins and no return travel is needed.
+            new_loop.ends.clear();
+        } else {
+            new_loop.clip_slope(seam_gap);
+        }
+
+        // When the previous layer's loop ended (within rounding) at this loop's
+        // ramp start, continue extruding in place: suppress the layer-change
+        // lift/travel/plunge, which on a continuous-flow extruder (no retraction)
+        // would deposit a bead at the seam. The writer's Z is synced to the
+        // physical nozzle position (change_layer() pre-set it to the new layer
+        // height without moving).
+        if (ramp_only && !new_loop.starts.empty() && m_last_pos_defined) {
+            const Point ramp_start = new_loop.starts.front().first_point();
+            if ((m_last_pos - ramp_start).cast<double>().norm() < scale_(0.1)) {
+                const auto&  first_slope   = new_loop.starts.front();
+                const double slope_begin_z = lerp(m_nominal_z - first_slope.height, m_nominal_z, first_slope.slope_begin.z_ratio);
+                m_writer.get_position().z() = slope_begin_z;
+                m_need_change_layer_lift_z  = false;
+                this->set_last_pos(ramp_start);
+            }
+        }
 
         // Then extrude it
         for (const auto& p : new_loop.get_all_paths()) {

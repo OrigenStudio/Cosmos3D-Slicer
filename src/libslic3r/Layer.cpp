@@ -194,7 +194,8 @@ void Layer::make_perimeters()
                         && config.seam_slope_entire_loop  == other_config.seam_slope_entire_loop
                         && config.seam_slope_min_length   == other_config.seam_slope_min_length
                         && config.seam_slope_steps        == other_config.seam_slope_steps
-                        && config.seam_slope_inner_walls  == other_config.seam_slope_inner_walls)
+                        && config.seam_slope_inner_walls  == other_config.seam_slope_inner_walls
+                        && config.seam_slope_ramp_only    == other_config.seam_slope_ramp_only)
 		            {
 			 			other_layerm->perimeters.clear();
 			 			other_layerm->fills.clear();

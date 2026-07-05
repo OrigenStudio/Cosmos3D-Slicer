@@ -1178,6 +1178,7 @@ bool PrintObject::invalidate_state_by_config_options(
             || opt_key == "seam_slope_min_length"
             || opt_key == "seam_slope_steps"
             || opt_key == "seam_slope_inner_walls"
+            || opt_key == "seam_slope_ramp_only"
             || opt_key == "support_speed"
             || opt_key == "support_interface_speed"
             || opt_key == "overhang_1_4_speed"
