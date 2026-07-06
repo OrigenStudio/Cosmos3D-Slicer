@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write   # needed to dispatch the build workflow for the new version
 
     steps:
       - name: Checkout
@@ -100,3 +101,13 @@ jobs:
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: bump version to ${new_version} and update changelog"
           git push
+
+      # A push made with GITHUB_TOKEN does not trigger further workflows, so the
+      # bump commit would never get built. Explicitly dispatch the build for the
+      # base branch: build_all then builds main at the new version and (on this
+      # workflow_dispatch event) publishes the v<version> release.
+      - name: Trigger build & release of the new version
+        if: github.event.pull_request.base.ref == 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run build_all.yml --ref main
