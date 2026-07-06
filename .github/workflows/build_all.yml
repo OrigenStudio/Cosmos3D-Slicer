@@ -65,6 +65,11 @@ jobs:
     secrets: inherit
   flatpak:
     name: "Flatpak"
+    # Temporarily disabled: the upstream orca_wxwidgets Flatpak module fails to
+    # apply its settings.cpp patch (settings.cpp.rej), breaking the build. Not
+    # required for the macOS/Windows/Linux-AppImage releases. Re-enable once the
+    # patch is refreshed for the current wxWidgets sources.
+    if: false
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
       options: --privileged
